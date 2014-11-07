@@ -386,6 +386,7 @@ bool b = i < j;
   \tiny \tt
   \begin{columns}[T]
    \begin{column}{0.2\textwidth}
+      \hrule
       I all\_of \\
       I any\_of \\
       I none\_of \\
@@ -402,7 +403,7 @@ bool b = i < j;
       F adjacent\_find \\
       F search \\
       F search\_n \\
-      
+      \hrule
       I,O copy \\
       I,O copy\_if \\
       I,O copy\_n \\
@@ -436,6 +437,7 @@ bool b = i < j;
       I,O unique\_copy
    \end{column}
    \begin{column}{0.3\textwidth}
+     \hrule
      is\_partitioned \\
      partition \\
      partition\_copy \\
@@ -448,7 +450,7 @@ bool b = i < j;
      partial\_sort\_copy \\
      stable\_sort \\
      nth\_element \\
-     
+     \hrule
      lower\_bound \\
      upper\_bound \\
      binary\_search \\
@@ -462,13 +464,14 @@ bool b = i < j;
      set\_unition 
    \end{column}
    \begin{column}{0.3\textwidth}
+     \hrule
      is\_heap \\
      is\_heap\_until \\
      make\_heap \\
      push\_heap \\
      pop\_heap \\
      sort\_heap \\
-     
+     \hrule
      max \\
      max\_element \\
      min \\
@@ -479,6 +482,7 @@ bool b = i < j;
      is\_permutation \\
      next\_permutation \\
      prev\_permutation \\
+     \hrule
      iota \\
      accumulate \\
      inner\_product \\
@@ -547,15 +551,34 @@ boost::for_each( values , []( double x ) { cout << x << endl; } );
 
 \sectionslide{Iterators and ranges for dynamical systems}
 
-\frame{
+\begin{frame}[fragile]
   \heading{Dynamical systems -- Maps}
   
   \begin{displaymath}
    x_{n+1} = f( x_n )
   \end{displaymath}
   
+  \begin{onlyenv}<1>
   picture of logistic map
-}
+  \end{onlyenv}
+  \begin{onlyenv}<2>
+     Iota:
+     
+     \begin{lstlisting}
+std::iota( first , last , 1 );
+     \end{lstlisting}
+     
+     $$x_{n+1} = x_n + 1 \quad\quad ( 1 , 2 , 3 , 4 , \dots )$$
+     
+     Generalized iota:
+     
+     $$x_{n+1} = x_n + 2 \quad \quad ( 1 , 3 , 5 , 7 , \dots )$$
+     
+     $$x_{n+1} = 2 x_n \quad \quad ( 1 , 2 , 4 , 8 , \dots )$$
+     
+     $$x_{n+1} = x_n^2 \quad \quad ( 1 , 1 , 1 , 1 , \dots )$$
+  \end{onlyenv}
+\end{frame}
 
 \frame{
   \heading{Dynamical systems -- ODEs}
@@ -588,22 +611,41 @@ boost::for_each( values , []( double x ) { cout << x << endl; } );
 }
 
 \frame{
+  \heading{Map iterator}
+  
+  Implementation
+  
+  two flavours, with count, with predicate
+  
+  Naive implementation
+}
+
+
+\frame{
   \heading{Map iterator - applications}
   
   Generalized iota
   
   Functional random number generators
+  
+  
 }
-
-
 
 \frame{
-  \heading{Map iterator}
+  \heading{Map iterator - pros and cons}
   
-  Implementation
-  
-  Naive implementation
+  Pro:
+  \begin{itemize}
+   \item Generalization of dynamical systems
+  \end{itemize}
+
+  Contra:
+  \begin{itemize}
+   \item end iterators needs to be unnecessary complex
+  \end{itemize}
 }
+
+
 
 \frame{
   \heading{Map range}
