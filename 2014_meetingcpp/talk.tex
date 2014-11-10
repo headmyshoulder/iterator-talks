@@ -438,56 +438,53 @@ bool b = i < j;
    \end{column}
    \begin{column}{0.3\textwidth}
      \hrule
-     is\_partitioned \\
-     partition \\
-     partition\_copy \\
-     stable\_partition \\
-     partition\_point \\
-     is\_sorted \\
-     is\_sorted\_until \\
-     sort \\
-     partial\_sort \\
-     partial\_sort\_copy \\
-     stable\_sort \\
-     nth\_element \\
+     I is\_partitioned \\
+     F,B partition \\
+     I,O partition\_copy \\
+     B stable\_partition \\
+     F partition\_point \\
+     F is\_sorted \\
+     F is\_sorted\_until \\
+     R sort \\
+     R partial\_sort \\
+     I,R partial\_sort\_copy \\
+     R stable\_sort \\
+     R nth\_element \\
      \hrule
-     lower\_bound \\
-     upper\_bound \\
-     binary\_search \\
-     equal\_range \\
-     merge \\
-     inplace\_merge \\
-     includes \\
-     set\_difference \\
-     set\_intersection \\
-     set\_symmetric\_difference \\
-     set\_unition 
+     F lower\_bound \\
+     F upper\_bound \\
+     F binary\_search \\
+     F equal\_range \\
+     I,O merge \\
+     B inplace\_merge \\
+     I includes \\
+     I,O set\_difference \\
+     I,O set\_intersection \\
+     I,O set\_symmetric\_difference \\
+     I,O set\_unition 
    \end{column}
    \begin{column}{0.3\textwidth}
      \hrule
-     is\_heap \\
-     is\_heap\_until \\
-     make\_heap \\
-     push\_heap \\
-     pop\_heap \\
-     sort\_heap \\
+     R is\_heap \\
+     R is\_heap\_until \\
+     R make\_heap \\
+     R push\_heap \\
+     R pop\_heap \\
+     R sort\_heap \\
      \hrule
-     max \\
-     max\_element \\
-     min \\
-     min\_element \\
-     minmax \\
-     minmax\_element \\
-     lexicographical\_compare \\
-     is\_permutation \\
-     next\_permutation \\
-     prev\_permutation \\
+     F max\_element \\
+     F min\_element \\
+     F minmax\_element \\
+     I lexicographical\_compare \\
+     F is\_permutation \\
+     B next\_permutation \\
+     B prev\_permutation \\
      \hrule
-     iota \\
-     accumulate \\
-     inner\_product \\
-     adjacent\_difference \\
-     partial\_sum
+     F iota \\
+     I accumulate \\
+     I inner\_product \\
+     I,O adjacent\_difference \\
+     I,O partial\_sum
    \end{column}
   \end{columns}
 
