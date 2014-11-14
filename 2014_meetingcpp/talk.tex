@@ -534,11 +534,16 @@ boost::for_each( values , []( double x ) { cout << x << endl; } );
 \frame{
   \heading{Ranges for the native C++}
   
+  Introduces new concepts:
+  
+  Iterable, Container, Sentinel
+  
   The range is the main abstraction not the iterator
   
   It holds all informations
   
   Concepts, asymmetric algorithms, sentinels have their own type.
+ 
 }
 
 
@@ -554,7 +559,14 @@ boost::for_each( values , []( double x ) { cout << x << endl; } );
    x_{n+1} = f( x_n )
   \end{displaymath}
   
-  picture of logistic map
+  \vspace{2ex}
+  
+  Example: Logistic map
+  
+  $$ x_{n+1} = r \, x_n ( 1 - x_n ) $$
+  
+    \centerline{ 
+\includegraphics[draft=false,width=0.5\textwidth]{logistic_map}}
 }
 
 \frame{
@@ -564,7 +576,16 @@ boost::for_each( values , []( double x ) { cout << x << endl; } );
    \frac{\de x}{\de t} = f( x , t )
   \end{displaymath}
   
-  picture of lorenz system?
+  \vspace{2ex}
+  
+  Example: Lorenz attractor
+  
+  $$\dot{x} = \sigma(y-x ) \quad \text{,} \quad 
+\dot{y} = x ( \rho - z ) - y \quad \text{,} \quad \dot{z} = xy - \beta z$$
+  
+  \centerline{ 
+\includegraphics[draft=false,width=0.7\textwidth]{lorenz.jpg}}
+
 }
 
 \frame{
@@ -575,47 +596,161 @@ boost::for_each( values , []( double x ) { cout << x << endl; } );
 
 
 \frame{
-  \heading{Map iterator}
+  \heading{Map range}
   
   Abstraction for $x_{n+1} = f(x_n)$
   
-  Problems:
+  \vspace{2ex}
+  
+  Two versions:
   
   \begin{enumerate}
-   \item $x$ could be intrinsic state of the iterator, or the iterator iterates $x$.
-   \item Stop criterium, which is the end iterator
+   \item {\tt map\_range} - stop predicate 
+   \item {\tt counted\_map\_range} - iterates $n$-times
   \end{enumerate}
+  
+  Map range model the SinglePassRange concept
 }
 
 \frame{
-  \heading{Map iterator - applications}
+  \heading{Map range - applications}
   
-  Generalized iota
-  
-  Functional random number generators
+  \begin{itemize}
+   \item Generalized iota
+   \item Functional random number generators
+   \item Ordinary differential equations
+   \item Maps (dyyamical maps)
+  \end{itemize}
 }
 
 
-
-\frame{
-  \heading{Map iterator}
-  
-  Implementation
-  
-  Naive implementation
-}
-
-\frame{
+\begin{frame}[fragile]
   \heading{Map range}
   
-  Better implementation
-}
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+template< typename T , typename F , typename C >
+class map_range
+{
+    struct iterator { ... };
 
-\frame{
-  \heading{Map iterators and ranges for the new standard}
+  public:
+    map_range( T value , F func , C condition )
+    : m_value { std::move( value ) }
+    , m_func { std::move( func ) }
+    , m_condition( condition )
+    {}
+    
+    iterator begin() const { return iterator( this ); }
+    iterator end() const { return iterator( nullptr ); }
+    
+private:
+    mutable T m_value;
+    mutable F m_func;
+    C m_condition;
+};
+\end{lstlisting}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \heading{Map range}
   
-  Sentinels
-}
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+struct iterator {
+    iterator( map_range const* _r ) : r( _r ) {}
+    
+    iterator& operator++() {
+        r->m_value = r->m_func( r->m_value );
+        if( r->m_condition( r->m_value ) ) {
+            r = nullptr;
+        }
+        return *this;
+    }
+    
+    T& operator*() const {
+        return r->m_value; }
+    bool operator==( iterator const& o ) const {
+        return ( r == o.r ); }
+    bool operator!=( iterator const& o ) const {
+        return ! ( *this == o );
+    }
+    
+    map_range const* r;
+};
+ 
+\end{lstlisting}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \heading{Counted map range}
+  
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+template< typename T , typename F >
+class counted_map_range
+{
+    struct iterator { ... };
+    
+public:
+    counted_map_range( T value , F func , size_t max_iterations )
+    : m_current_iteration { 0 }
+    , m_max_iterations { max_iterations }
+    , m_value { std::move( value ) }
+    , m_func { std::move( func ) }
+    {}
+    
+    iterator begin() const { return iterator( this ); }
+    iterator end( void ) { return iterator( nullptr ); }
+    
+private:
+    mutable size_t m_current_iteration = 0;
+    const size_t m_max_iterations;
+    mutable T m_value;
+    mutable F m_func;
+};
+\end{lstlisting}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+ \heading{First examples}
+ 
+ Generalized Iota:
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+size_t n = 10;
+auto iota = make_counted_map_range( 1 , []( auto x ) {
+    return x * 2; } , 10 );
+
+std::vector< int > values;
+boost::copy( iota_range , std::back_inserter( values ) );
+for( auto i : values ) { cout << i << endl; }
+\end{lstlisting}
+
+\vspace{2ex}
+Logistic map:
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+double r = 3.2;
+auto l = [r]( auto x ) {return r * x * ( 1.0 - x ); };
+auto range = make_counted_map_range( 0.5 , l , 1000 );
+for( auto x : range ) { cout << x << endl; }
+\end{lstlisting}
+ 
+\end{frame}
+
+
+\begin{frame}[fragile]
+ \heading{Problems: Projection}
+ 
+ We can not easily generate a square iota:
+ 
+ $1,4,9,16,25,36,...$
+ 
+\end{frame}
+
+
 
 \section{Iterators for GPUs}
 
