@@ -582,17 +582,33 @@ boost::for_each( values , []( double x ) { cout << x << endl; } );
   
   $$\dot{x} = \sigma(y-x ) \quad \text{,} \quad 
 \dot{y} = x ( \rho - z ) - y \quad \text{,} \quad \dot{z} = xy - \beta z$$
-  
-  \centerline{ 
+
+ \centerline{ 
 \includegraphics[draft=false,width=0.7\textwidth]{lorenz.jpg}}
 
+  Numerical solution:
+  
+  $$x(t+\Delta t) = F( x(t) )$$
+
+
 }
 
-\frame{
-  \heading{Numerical integration}
+\begin{frame}[fragile]
+ 
+  \heading{Newton method}
 
-  Lagrange integration
-}
+  Find the root
+  
+  $$0 = f(x)$$
+  
+  Newtons method
+  
+  \begin{itemize}
+   \item Choose $x_0$
+   \item Iterate $x_{n+1} = x_{n} - \frac{f(x_n)}{f'(x_n)}$
+  \end{itemize}
+
+\end{frame}
 
 
 \frame{
@@ -609,7 +625,7 @@ boost::for_each( values , []( double x ) { cout << x << endl; } );
    \item {\tt counted\_map\_range} - iterates $n$-times
   \end{enumerate}
   
-  Map range model the SinglePassRange concept
+  Map range models the SinglePassRange concept
 }
 
 \frame{
@@ -619,9 +635,36 @@ boost::for_each( values , []( double x ) { cout << x << endl; } );
    \item Generalized iota
    \item Functional random number generators
    \item Ordinary differential equations
-   \item Maps (dyyamical maps)
+   \item Maps (dynamical maps)
   \end{itemize}
 }
+
+\begin{frame}[fragile]
+  \heading{Map range -- implementation}
+  
+  \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+template< typename T1 , ... > class map_range
+{
+    struct iterator { ... };
+ public:
+    // ...
+    iterator begin() { return iterator( this ); }
+    iterator end() { return iterator( nullptr ); }
+    // ...
+};
+   \end{lstlisting}
+   
+   Range algorithms redirect to iterator algorithms:
+   \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+template< typename R , typename F >
+void for_each( R const& r , F f ) {
+    std::for_each( r.begin() , e.end() , f );
+}
+   \end{lstlisting}
+
+
+\end{frame}
+
 
 
 \begin{frame}[fragile]
