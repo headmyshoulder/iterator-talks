@@ -26,7 +26,7 @@
 % \newcommand{\heading}[1]{\centerline{\Large #1} \vspace{0.5em}}
 \newcommand{\heading}[1]{\frametitle{#1}}
 
-\newcommand{\odeint}[0]{odeint}
+\newcommand{\odeint}[0]{Boost.Odeint}
 \newcommand{\thrust}[0]{Thrust}
 \newcommand{\vexcl}[0]{VexCL}
 \newcommand{\boostcompute}[0]{Boost.Compute}
@@ -625,7 +625,7 @@ boost::for_each( values , []( double x ) { cout << x << endl; } );
    \item {\tt counted\_map\_range} - iterates $n$-times
   \end{enumerate}
   
-  Map range models the SinglePassRange concept
+  Models the SinglePassRange concept
 }
 
 \frame{
@@ -727,6 +727,7 @@ struct iterator {
 \end{frame}
 
 
+
 \begin{frame}[fragile]
   \heading{Counted map range}
   
@@ -759,7 +760,38 @@ private:
 
 
 \begin{frame}[fragile]
- \heading{First examples}
+ \heading{Factory functions}
+ 
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+template< typename T , typename F , typename C >
+auto make_map_range( T t , F f , C condition )
+{
+    return map_range< T , F , C >(
+        std::move( t ) ,
+        std::move( f ) ,
+        std::move( condition ) );
+}
+\end{lstlisting}
+
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+template< typename T , typename F >
+auto make_counted_map_range( T t , F f , size_t max_iterations )
+{
+    return counted_map_range< T , F >(
+        std::move( t ) ,
+        std::move( f ) , 
+        max_iterations );
+}
+\end{lstlisting}
+ 
+
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+ \heading{Examples -- generalized iota}
  
  Generalized Iota:
 \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
@@ -772,8 +804,36 @@ boost::copy( iota_range , std::back_inserter( values ) );
 for( auto i : values ) { cout << i << endl; }
 \end{lstlisting}
 
-\vspace{2ex}
-Logistic map:
+\end{frame}
+
+\begin{frame}[fragile]
+  \heading{Examples -- generalized iota}
+  
+  \textbf{Problem:} We can not easily generate a square iota:
+ 
+  $1,4,9,16,25,36,...$
+    
+  \pause
+ 
+  Introduce a projected map range.
+  
+  \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+auto iota_range = make_projected_counted_map_range(
+    1 
+    , []( auto x ) { return x+1 ; }
+    , 11
+    , []( auto x ) { return x*x; }
+    );
+for( auto i : iota_range ) { std::cout << i << std::endl; }
+  \end{lstlisting}
+
+
+\end{frame}
+
+\begin{frame}[fragile]
+
+  \heading{Example - logistic map}
+
 \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 double r = 3.2;
 auto l = [r]( auto x ) {return r * x * ( 1.0 - x ); };
@@ -785,13 +845,142 @@ for( auto x : range ) { cout << x << endl; }
 
 
 \begin{frame}[fragile]
- \heading{Problems: Projection}
+ \heading{Example -- Newton method}
  
- We can not easily generate a square iota:
- 
- $1,4,9,16,25,36,...$
- 
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+auto newton_range(
+    auto x , auto f , auto df ,
+    auto break_condition )
+{
+    return make_map_range(
+        x ,
+        [f,df]( auto x ) { return x - f( x ) / df( x ); } ,
+        break_condition );
+}
+\end{lstlisting}
+
 \end{frame}
+
+
+
+
+\begin{frame}[fragile]
+ \heading{Example -- Newton method}
+ 
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+auto f = []( auto x ) { return exp(-x*x) - 0.5; };
+auto df = []( auto x ) { return -2.0*x * exp(-x*x); };
+auto cond  = [f]( auto x ) {
+    return std::abs(f(x)) < 1.0e-12; };
+
+auto range = newton_range( 1.0 , f , df , cond );
+
+for( auto r : range )
+    std::cout << r << " : " << f( r ) << std::endl;
+\end{lstlisting}
+
+ \centerline{ 
+\includegraphics[draft=false,width=0.5\textwidth]{newton1}} 
+
+\end{frame}
+
+
+
+
+
+\begin{frame}[fragile]
+  \heading{Example -- ODE solver}
+  
+  Solve $\dot{x} = f(x,t)$, Solver $F$ : $x(t+\delta t)=F(x(t))$
+  
+  Example \odeint:
+  
+\begin{lstlisting}[basicstyle=\tiny\ttfamily]
+namespace odeint = boost::numeric::odeint;
+
+auto lorenz = []( auto const& x , auto& dxdt , auto t )
+{
+    dxdt[0] = 10.0 * ( x[1] - x[0] );
+    dxdt[1] = 28.0 * x[0] - x[1] - x[0] * x[2];
+    dxdt[2] = -8.0 / 3.0 * x[2] + x[0] * x[1];
+};
+
+using state_type = std::array< double , 3 >;
+odeint::runge_kutta4< state_type > stepper;
+
+state_type x {{ 10.0 , 10.0 , 10.0 }};
+double t = 0.0 , dt = 0.01;
+stepper.do_step( lorenz , x , t , dt );
+t += dt;
+  \end{lstlisting}
+  
+Integrate functions:
+\begin{lstlisting}[basicstyle=\tiny\ttfamily]
+auto obs = []( auto x , auto t ) { std::cout << t << " " << x[0] << "\n"; };
+odeint::integrate_const( stepper , lorenz , x , 0.0 , 10.0 , dt , obs );
+\end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]
+ \heading{Example -- ODE Solver}
+ 
+ \begin{lstlisting}[basicstyle=\tiny\ttfamily]
+auto make_ode_range( auto sys , auto stepper , auto x ,
+    auto t0 , auto dt , auto t1 )
+{
+    auto solve = [sys,stepper,dt]( auto x ) mutable { 
+        stepper.do_step( sys , x.first , x.second , dt );
+        x.second += dt;
+        return x; };
+    auto cond = [t1]( auto const& x ) { return x.second > t1; };
+    auto range = make_map_range( std::make_pair(x,t0) , solver , cond );
+    return range;
+}
+ \end{lstlisting}
+ 
+ Can be used as
+\begin{lstlisting}[basicstyle=\tiny\ttfamily]
+state_type x {{ 10.0 , 10.0 , 10.0 }};
+stepper_type stepper;
+auto range = make_ode_range( lorenz , stepper , x , 0.0 , 0.1 , 100.0 );
+
+for( auto r : range )
+    std::cout << r.second << " " << r.first[0] << " " << r.first[1] << "\n"; 
+\end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]
+ \heading{ODE ranges}
+ 
+ Superior to integrate functions:
+ \begin{itemize}
+  \item Break conditions are easy
+  \item ODE-Ranges can be used in a natural C++ way, {\tt find}, {\tt 
+transform} , etc.
+ \end{itemize}
+ 
+ But, the implementation has some drawbacks -> custom range implementations
+ \begin{itemize}
+  \item Better performance.
+  \item Step size control -- complicated iteration.
+  \item Break condition can use the last two values.
+ \end{itemize}
+
+\end{frame}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
