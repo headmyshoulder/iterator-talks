@@ -17,5 +17,4 @@ endif ()
 include_directories ( ${Boost_INCLUDE_DIRS} )
 
 add_executable ( examples_io examples_io.cpp )
-
-
+add_executable ( logistic_map logistic_map.cpp )

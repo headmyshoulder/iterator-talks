@@ -26,7 +26,7 @@
 % \newcommand{\heading}[1]{\centerline{\Large #1} \vspace{0.5em}}
 \newcommand{\heading}[1]{\frametitle{#1}}
 
-\newcommand{\odeint}[0]{odeint}
+\newcommand{\odeint}[0]{Boost.Odeint}
 \newcommand{\thrust}[0]{Thrust}
 \newcommand{\vexcl}[0]{VexCL}
 \newcommand{\boostcompute}[0]{Boost.Compute}
@@ -386,7 +386,6 @@ bool b = i < j;
   \tiny \tt
   \begin{columns}[T]
    \begin{column}{0.2\textwidth}
-      \hrule
       I all\_of \\
       I any\_of \\
       I none\_of \\
@@ -403,7 +402,7 @@ bool b = i < j;
       F adjacent\_find \\
       F search \\
       F search\_n \\
-      \hrule
+      
       I,O copy \\
       I,O copy\_if \\
       I,O copy\_n \\
@@ -437,54 +436,53 @@ bool b = i < j;
       I,O unique\_copy
    \end{column}
    \begin{column}{0.3\textwidth}
-     \hrule
-     I is\_partitioned \\
-     F,B partition \\
-     I,O partition\_copy \\
-     B stable\_partition \\
-     F partition\_point \\
-     F is\_sorted \\
-     F is\_sorted\_until \\
-     R sort \\
-     R partial\_sort \\
-     I,R partial\_sort\_copy \\
-     R stable\_sort \\
-     R nth\_element \\
-     \hrule
-     F lower\_bound \\
-     F upper\_bound \\
-     F binary\_search \\
-     F equal\_range \\
-     I,O merge \\
-     B inplace\_merge \\
-     I includes \\
-     I,O set\_difference \\
-     I,O set\_intersection \\
-     I,O set\_symmetric\_difference \\
-     I,O set\_unition 
-   \end{column}
-   \begin{column}{0.3\textwidth}
-     \hrule
-     R is\_heap \\
-     R is\_heap\_until \\
-     R make\_heap \\
-     R push\_heap \\
-     R pop\_heap \\
-     R sort\_heap \\
-     \hrule
-     F max\_element \\
-     F min\_element \\
-     F minmax\_element \\
-     I lexicographical\_compare \\
-     F is\_permutation \\
-     B next\_permutation \\
-     B prev\_permutation \\
-     \hrule
-     F iota \\
-     I accumulate \\
-     I inner\_product \\
-     I,O adjacent\_difference \\
-     I,O partial\_sum
+      I is\_partitioned \\
+      F,B partition \\
+      I,O partition\_copy \\
+      B stable\_partition \\
+      F partition\_point \\
+      F is\_sorted \\
+      F is\_sorted\_until \\
+      R sort \\
+      R partial\_sort \\
+      I,R partial\_sort\_copy \\
+      R stable\_sort \\
+      R nth\_element \\
+      \hrule
+      F lower\_bound \\
+      F upper\_bound \\
+      F binary\_search \\
+      F equal\_range \\
+      I,O merge \\
+      B inplace\_merge \\
+      I includes \\
+      I,O set\_difference \\
+      I,O set\_intersection \\
+      I,O set\_symmetric\_difference \\
+      I,O set\_unition 
+    \end{column}
+    \begin{column}{0.3\textwidth}
+      \hrule
+      R is\_heap \\
+      R is\_heap\_until \\
+      R make\_heap \\
+      R push\_heap \\
+      R pop\_heap \\
+      R sort\_heap \\
+      \hrule
+      F max\_element \\
+      F min\_element \\
+      F minmax\_element \\
+      I lexicographical\_compare \\
+      F is\_permutation \\
+      B next\_permutation \\
+      B prev\_permutation \\
+      \hrule
+      F iota \\
+      I accumulate \\
+      I inner\_product \\
+      I,O adjacent\_difference \\
+      I,O partial\_sum
    \end{column}
   \end{columns}
 
@@ -535,11 +533,16 @@ boost::for_each( values , []( double x ) { cout << x << endl; } );
 \frame{
   \heading{Ranges for the native C++}
   
+  Introduces new concepts:
+  
+  Iterable, Container, Sentinel
+  
   The range is the main abstraction not the iterator
   
   It holds all informations
   
   Concepts, asymmetric algorithms, sentinels have their own type.
+ 
 }
 
 
@@ -548,34 +551,22 @@ boost::for_each( values , []( double x ) { cout << x << endl; } );
 
 \sectionslide{Iterators and ranges for dynamical systems}
 
-\begin{frame}[fragile]
+\frame{
   \heading{Dynamical systems -- Maps}
   
   \begin{displaymath}
    x_{n+1} = f( x_n )
   \end{displaymath}
   
-  \begin{onlyenv}<1>
-  picture of logistic map
-  \end{onlyenv}
-  \begin{onlyenv}<2>
-     Iota:
-     
-     \begin{lstlisting}
-std::iota( first , last , 1 );
-     \end{lstlisting}
-     
-     $$x_{n+1} = x_n + 1 \quad\quad ( 1 , 2 , 3 , 4 , \dots )$$
-     
-     Generalized iota:
-     
-     $$x_{n+1} = x_n + 2 \quad \quad ( 1 , 3 , 5 , 7 , \dots )$$
-     
-     $$x_{n+1} = 2 x_n \quad \quad ( 1 , 2 , 4 , 8 , \dots )$$
-     
-     $$x_{n+1} = x_n^2 \quad \quad ( 1 , 1 , 1 , 1 , \dots )$$
-  \end{onlyenv}
-\end{frame}
+  \vspace{2ex}
+  
+  Example: Logistic map
+  
+  $$ x_{n+1} = r \, x_n ( 1 - x_n ) $$
+  
+    \centerline{ 
+\includegraphics[draft=false,width=0.5\textwidth]{logistic_map}}
+}
 
 \frame{
   \heading{Dynamical systems -- ODEs}
@@ -584,77 +575,413 @@ std::iota( first , last , 1 );
    \frac{\de x}{\de t} = f( x , t )
   \end{displaymath}
   
-  picture of lorenz system?
+  \vspace{2ex}
+  
+  Example: Lorenz attractor
+  
+  $$\dot{x} = \sigma(y-x ) \quad \text{,} \quad 
+\dot{y} = x ( \rho - z ) - y \quad \text{,} \quad \dot{z} = xy - \beta z$$
+
+ \centerline{ 
+\includegraphics[draft=false,width=0.7\textwidth]{lorenz.jpg}}
+
+  Numerical solution:
+  
+  $$x(t+\Delta t) = F( x(t) )$$
+
+
 }
 
-\frame{
-  \heading{Numerical integration}
+\begin{frame}[fragile]
+ 
+  \heading{Newton method}
 
-  Lagrange integration
-}
-
-
-\frame{
-  \heading{Map iterator}
+  Find the root
   
-  Abstraction for $x_{n+1} = f(x_n)$
+  $$0 = f(x)$$
   
-  Problems:
+  Newtons method
   
-  \begin{enumerate}
-   \item $x$ could be intrinsic state of the iterator, or the iterator iterates $x$.
-   \item Stop criterium, which is the end iterator
-  \end{enumerate}
-}
-
-\frame{
-  \heading{Map iterator}
-  
-  Implementation
-  
-  two flavours, with count, with predicate
-  
-  Naive implementation
-}
-
-
-\frame{
-  \heading{Map iterator - applications}
-  
-  Generalized iota
-  
-  Functional random number generators
-  
-  
-}
-
-\frame{
-  \heading{Map iterator - pros and cons}
-  
-  Pro:
   \begin{itemize}
-   \item Generalization of dynamical systems
+   \item Choose $x_0$
+   \item Iterate $x_{n+1} = x_{n} - \frac{f(x_n)}{f'(x_n)}$
   \end{itemize}
 
-  Contra:
-  \begin{itemize}
-   \item end iterators needs to be unnecessary complex
-  \end{itemize}
-}
-
+\end{frame}
 
 
 \frame{
   \heading{Map range}
   
-  Better implementation
+  Abstraction for $x_{n+1} = f(x_n)$
+  
+  \vspace{2ex}
+  
+  Two versions:
+  
+  \begin{enumerate}
+   \item {\tt map\_range} - stop predicate 
+   \item {\tt counted\_map\_range} - iterates $n$-times
+  \end{enumerate}
+  
+  Models the SinglePassRange concept
 }
 
 \frame{
-  \heading{Map iterators and ranges for the new standard}
+  \heading{Map range - applications}
   
-  Sentinels
+  \begin{itemize}
+   \item Generalized iota
+   \item Functional random number generators
+   \item Ordinary differential equations
+   \item Maps (dynamical maps)
+  \end{itemize}
 }
+
+\begin{frame}[fragile]
+  \heading{Map range -- implementation}
+  
+  \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+template< typename T1 , ... > class map_range
+{
+    struct iterator { ... };
+ public:
+    // ...
+    iterator begin() { return iterator( this ); }
+    iterator end() { return iterator( nullptr ); }
+    // ...
+};
+   \end{lstlisting}
+   
+   Range algorithms redirect to iterator algorithms:
+   \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+template< typename R , typename F >
+void for_each( R const& r , F f ) {
+    std::for_each( r.begin() , e.end() , f );
+}
+   \end{lstlisting}
+
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+  \heading{Map range}
+  
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+template< typename T , typename F , typename C >
+class map_range
+{
+    struct iterator { ... };
+
+  public:
+    map_range( T value , F func , C condition )
+    : m_value { std::move( value ) }
+    , m_func { std::move( func ) }
+    , m_condition( condition )
+    {}
+    
+    iterator begin() const { return iterator( this ); }
+    iterator end() const { return iterator( nullptr ); }
+    
+private:
+    mutable T m_value;
+    mutable F m_func;
+    C m_condition;
+};
+\end{lstlisting}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \heading{Map range}
+  
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+struct iterator {
+    iterator( map_range const* _r ) : r( _r ) {}
+    
+    iterator& operator++() {
+        r->m_value = r->m_func( r->m_value );
+        if( r->m_condition( r->m_value ) ) {
+            r = nullptr;
+        }
+        return *this;
+    }
+    
+    T& operator*() const {
+        return r->m_value; }
+    bool operator==( iterator const& o ) const {
+        return ( r == o.r ); }
+    bool operator!=( iterator const& o ) const {
+        return ! ( *this == o );
+    }
+    
+    map_range const* r;
+};
+ 
+\end{lstlisting}
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+  \heading{Counted map range}
+  
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+template< typename T , typename F >
+class counted_map_range
+{
+    struct iterator { ... };
+    
+public:
+    counted_map_range( T value , F func , size_t max_iterations )
+    : m_current_iteration { 0 }
+    , m_max_iterations { max_iterations }
+    , m_value { std::move( value ) }
+    , m_func { std::move( func ) }
+    {}
+    
+    iterator begin() const { return iterator( this ); }
+    iterator end( void ) { return iterator( nullptr ); }
+    
+private:
+    mutable size_t m_current_iteration = 0;
+    const size_t m_max_iterations;
+    mutable T m_value;
+    mutable F m_func;
+};
+\end{lstlisting}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+ \heading{Factory functions}
+ 
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+template< typename T , typename F , typename C >
+auto make_map_range( T t , F f , C condition )
+{
+    return map_range< T , F , C >(
+        std::move( t ) ,
+        std::move( f ) ,
+        std::move( condition ) );
+}
+\end{lstlisting}
+
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+template< typename T , typename F >
+auto make_counted_map_range( T t , F f , size_t max_iterations )
+{
+    return counted_map_range< T , F >(
+        std::move( t ) ,
+        std::move( f ) , 
+        max_iterations );
+}
+\end{lstlisting}
+ 
+
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+ \heading{Examples -- generalized iota}
+ 
+ Generalized Iota:
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+size_t n = 10;
+auto iota = make_counted_map_range( 1 , []( auto x ) {
+    return x * 2; } , 10 );
+
+std::vector< int > values;
+boost::copy( iota_range , std::back_inserter( values ) );
+for( auto i : values ) { cout << i << endl; }
+\end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \heading{Examples -- generalized iota}
+  
+  \textbf{Problem:} We can not easily generate a square iota:
+ 
+  $1,4,9,16,25,36,...$
+    
+  \pause
+ 
+  Introduce a projected map range.
+  
+  \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+auto iota_range = make_projected_counted_map_range(
+    1 
+    , []( auto x ) { return x+1 ; }
+    , 11
+    , []( auto x ) { return x*x; }
+    );
+for( auto i : iota_range ) { std::cout << i << std::endl; }
+  \end{lstlisting}
+
+
+\end{frame}
+
+\begin{frame}[fragile]
+
+  \heading{Example - logistic map}
+
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+double r = 3.2;
+auto l = [r]( auto x ) {return r * x * ( 1.0 - x ); };
+auto range = make_counted_map_range( 0.5 , l , 1000 );
+for( auto x : range ) { cout << x << endl; }
+\end{lstlisting}
+ 
+\end{frame}
+
+
+\begin{frame}[fragile]
+ \heading{Example -- Newton method}
+ 
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+auto newton_range(
+    auto x , auto f , auto df ,
+    auto break_condition )
+{
+    return make_map_range(
+        x ,
+        [f,df]( auto x ) { return x - f( x ) / df( x ); } ,
+        break_condition );
+}
+\end{lstlisting}
+
+\end{frame}
+
+
+
+
+\begin{frame}[fragile]
+ \heading{Example -- Newton method}
+ 
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+auto f = []( auto x ) { return exp(-x*x) - 0.5; };
+auto df = []( auto x ) { return -2.0*x * exp(-x*x); };
+auto cond  = [f]( auto x ) {
+    return std::abs(f(x)) < 1.0e-12; };
+
+auto range = newton_range( 1.0 , f , df , cond );
+
+for( auto r : range )
+    std::cout << r << " : " << f( r ) << std::endl;
+\end{lstlisting}
+
+ \centerline{ 
+\includegraphics[draft=false,width=0.5\textwidth]{newton1}} 
+
+\end{frame}
+
+
+
+
+
+\begin{frame}[fragile]
+  \heading{Example -- ODE solver}
+  
+  Solve $\dot{x} = f(x,t)$, Solver $F$ : $x(t+\delta t)=F(x(t))$
+  
+  Example \odeint:
+  
+\begin{lstlisting}[basicstyle=\tiny\ttfamily]
+namespace odeint = boost::numeric::odeint;
+
+auto lorenz = []( auto const& x , auto& dxdt , auto t )
+{
+    dxdt[0] = 10.0 * ( x[1] - x[0] );
+    dxdt[1] = 28.0 * x[0] - x[1] - x[0] * x[2];
+    dxdt[2] = -8.0 / 3.0 * x[2] + x[0] * x[1];
+};
+
+using state_type = std::array< double , 3 >;
+odeint::runge_kutta4< state_type > stepper;
+
+state_type x {{ 10.0 , 10.0 , 10.0 }};
+double t = 0.0 , dt = 0.01;
+stepper.do_step( lorenz , x , t , dt );
+t += dt;
+  \end{lstlisting}
+  
+Integrate functions:
+\begin{lstlisting}[basicstyle=\tiny\ttfamily]
+auto obs = []( auto x , auto t ) { std::cout << t << " " << x[0] << "\n"; };
+odeint::integrate_const( stepper , lorenz , x , 0.0 , 10.0 , dt , obs );
+\end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]
+ \heading{Example -- ODE Solver}
+ 
+ \begin{lstlisting}[basicstyle=\tiny\ttfamily]
+auto make_ode_range( auto sys , auto stepper , auto x ,
+    auto t0 , auto dt , auto t1 )
+{
+    auto solve = [sys,stepper,dt]( auto x ) mutable { 
+        stepper.do_step( sys , x.first , x.second , dt );
+        x.second += dt;
+        return x; };
+    auto cond = [t1]( auto const& x ) { return x.second > t1; };
+    auto range = make_map_range( std::make_pair(x,t0) , solver , cond );
+    return range;
+}
+ \end{lstlisting}
+ 
+ Can be used as
+\begin{lstlisting}[basicstyle=\tiny\ttfamily]
+state_type x {{ 10.0 , 10.0 , 10.0 }};
+stepper_type stepper;
+auto range = make_ode_range( lorenz , stepper , x , 0.0 , 0.1 , 100.0 );
+
+for( auto r : range )
+    std::cout << r.second << " " << r.first[0] << " " << r.first[1] << "\n"; 
+\end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]
+ \heading{ODE ranges}
+ 
+ Superior to integrate functions:
+ \begin{itemize}
+  \item Break conditions are easy
+  \item ODE-Ranges can be used in a natural C++ way, {\tt find}, {\tt 
+transform} , etc.
+ \end{itemize}
+ 
+ But, the implementation has some drawbacks -> custom range implementations
+ \begin{itemize}
+  \item Better performance.
+  \item Step size control -- complicated iteration.
+  \item Break condition can use the last two values.
+ \end{itemize}
+
+\end{frame}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 \section{Iterators for GPUs}
 
