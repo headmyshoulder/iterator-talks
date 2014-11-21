@@ -627,17 +627,6 @@ boost::for_each( values , []( double x ) { cout << x << endl; } );
   Models the SinglePassRange concept
 }
 
-\frame{
-  \heading{Map range - applications}
-  
-  \begin{itemize}
-   \item Generalized iota
-   \item Functional random number generators
-   \item Ordinary differential equations
-   \item Maps (dynamical maps)
-  \end{itemize}
-}
-
 \begin{frame}[fragile]
   \heading{Map range -- implementation}
   
@@ -974,6 +963,17 @@ transform} , etc.
 
 
 
+\frame{
+  \heading{Map range - applications}
+  
+  \begin{itemize}
+   \item Generalized iota
+   \item Ordinary differential equations
+   \item Maps (dynamical maps)
+   \item Converging algorithms
+   \item Functional random number generators
+  \end{itemize}
+}
 
 
 
@@ -990,13 +990,13 @@ transform} , etc.
 \frame{
   \heading{High-level libraries for GPUs}
   
-  \begin{enumerate}
+  \begin{itemize}
     \item Thrust
     \item VexCL
     \item Boost.Compute
     \item ViennaCL
     \item Cuda-MTL
-  \end{enumerate}
+  \end{itemize}
 }
 
 \frame{
@@ -1017,11 +1017,6 @@ transform} , etc.
   special iterators
   
   Algorithms
-}
-
-\frame{
-  \heading{Implementation details of Thrust iterators}
-
 }
 
 \frame{
