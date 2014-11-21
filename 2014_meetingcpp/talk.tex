@@ -625,7 +625,6 @@ boost::for_each( values , []( double x ) { cout << x << endl; } );
   Models the SinglePassRange concept
 }
 
-
 \begin{frame}[fragile]
   \heading{Map range -- implementation}
   
@@ -976,6 +975,17 @@ transform} , etc.
 
 
 
+\frame{
+  \heading{Map range - applications}
+  
+  \begin{itemize}
+   \item Generalized iota
+   \item Ordinary differential equations
+   \item Maps (dynamical maps)
+   \item Converging algorithms
+   \item Functional random number generators
+  \end{itemize}
+}
 
 
 
@@ -992,13 +1002,13 @@ transform} , etc.
 \frame{
   \heading{High-level libraries for GPUs}
   
-  \begin{enumerate}
+  \begin{itemize}
     \item Thrust
     \item VexCL
     \item Boost.Compute
     \item ViennaCL
     \item Cuda-MTL
-  \end{enumerate}
+  \end{itemize}
 }
 
 \begin{frame}[fragile]
@@ -1038,8 +1048,9 @@ thrust::copy(d_vec.begin(), d_vec.end(), h_vec.begin());
 }
 
 
-\begin{frame}[fragile]
-  \heading{Special problems - and solutions}
+\frame{
+  \heading{Special iterators for Thrust}
+
   
   Calculate the norm of a vector
   
