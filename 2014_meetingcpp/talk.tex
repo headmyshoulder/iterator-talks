@@ -583,11 +583,9 @@ boost::for_each( values , []( double x ) { cout << x << endl; } );
 \dot{y} = x ( \rho - z ) - y \quad \text{,} \quad \dot{z} = xy - \beta z$$
 
  \centerline{ 
-\includegraphics[draft=false,width=0.7\textwidth]{lorenz.jpg}}
+\includegraphics[draft=false,width=0.6\textwidth]{lorenz.jpg}}
 
-  Numerical solution:
-  
-  $$x(t+\Delta t) = F( x(t) )$$
+  Numerical solution: $x(t+\Delta t) = F( x(t) )$
 
 
 }
@@ -596,9 +594,9 @@ boost::for_each( values , []( double x ) { cout << x << endl; } );
  
   \heading{Newton method}
 
-  Find the root
+  Find the root: $0 = f(x)$
   
-  $$0 = f(x)$$
+  \vspace{2ex}
   
   Newtons method
   
@@ -627,16 +625,6 @@ boost::for_each( values , []( double x ) { cout << x << endl; } );
   Models the SinglePassRange concept
 }
 
-\frame{
-  \heading{Map range - applications}
-  
-  \begin{itemize}
-   \item Generalized iota
-   \item Functional random number generators
-   \item Ordinary differential equations
-   \item Maps (dynamical maps)
-  \end{itemize}
-}
 
 \begin{frame}[fragile]
   \heading{Map range -- implementation}
@@ -970,6 +958,20 @@ transform} , etc.
 \end{frame}
 
 
+\frame{
+  \heading{Map range - applications}
+  
+  \begin{itemize}
+   \item Generalized iota
+   \item Ordinary differential equations
+   \item Maps (dynamical maps)
+   \item Functional random number generators
+   \item Opmization methods
+   \begin{itemize}
+     \item Genetic algorithms, Simulated annealing, \dots
+   \end{itemize}
+  \end{itemize}
+}
 
 
 
@@ -999,45 +1001,83 @@ transform} , etc.
   \end{enumerate}
 }
 
-\frame{
+\begin{frame}[fragile]
   \heading{Thrust}
   
-  STL-like library for Cuda
-  
-  Design is based on iterators
-}
+  Thrust is STL-like library for Cuda -- Based on iterators.
+ 
+  \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+thrust::host_vector<int> h_vec( 1024 );
+std::generate(h_vec.begin(), h_vec.end(), rand);
+
+thrust::device_vector<int> d_vec = h_vec;
+thrust::sort(d_vec.begin(), d_vec.end());
+
+thrust::copy(d_vec.begin(), d_vec.end(), h_vec.begin());
+  \end{lstlisting}
+
+\end{frame}
 
 \frame{
   \heading{Iterators in Thrust}
   
-  {\tt device\_vector::iterator}
+  \begin{itemize}
+   \item \lstinline$device_vector< T >::iterator$
+   \item \lstinline$host_vector< T >::iterator$
+   \item Special (fancy) iterator
+   \begin{itemize}
+   \item \lstinline$zip_iterator$
+   \item \lstinline$transform_iterator$
+   \item \lstinline$permutation_iterator$
+   \item \lstinline$constant_iterator$, \lstinline$counting_iterator$, 
+\lstinline$discard_iterator$, \lstinline$reverse_iterator$
+   \end{itemize}
+  \end{itemize}
   
-  {\tt host\_vector::iterator}
-  
-  special iterators
-  
-  Algorithms
+  Custom algorithms
 }
 
-\frame{
-  \heading{Implementation details of Thrust iterators}
 
-}
-
-\frame{
-  \heading{Special iterators for Thrust}
-  
-  zip iterator
-  
-  transform iterator
-  
-}
-
-\frame{
+\begin{frame}[fragile]
   \heading{Special problems - and solutions}
+  
+  Calculate the norm of a vector
+  
+  $$||x|| = \sum\limits_{i=1}^{N} x_i^2$$
+  
+  \vspace{2ex}
 
-  Norm
-}
+  \begin{onlyenv}<1>
+  \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+thrust::device_vector< double > x;
+// fill x
+
+double n = thrust::reduce(x.begin(), x.end(), 0.0); // ?
+  \end{lstlisting}
+  \end{onlyenv}
+  \begin{onlyenv}<2>
+  \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+thrust::device_vector< double > x;
+// fill x
+
+auto op = []( auto x , auto y ) { return x + y*y; };
+double n = thrust::reduce(x.begin() ,x.end() ,0.0 ,op); // ?
+  \end{lstlisting}
+  \end{onlyenv}
+  \begin{onlyenv}<3>
+  \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+thrust::device_vector< double > x;
+// fill x
+
+op = []( auto x ) { return x; };
+double n = thrust::reduce(
+thrust::make_transform_iterator( x.begin() , op ) ,
+thrust::make_transform_iterator( x.end() , op ) , 0.0 ); // correct
+  \end{lstlisting}
+  \end{onlyenv}
+
+
+\end{frame}
 
 \frame{
   \heading{Special problems - and solutions}
