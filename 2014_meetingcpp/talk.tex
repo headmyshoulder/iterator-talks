@@ -192,11 +192,15 @@
 
 
 
+
+
 \frame{
   \titlepage
 
 
 }
+
+
 
 \begin{frame}
   \heading{Outline}
@@ -204,102 +208,73 @@
   \tableofcontents
 \end{frame}
 
+
+
 \section{Introduction}
 
 \sectionslide{Introduction}
 
-\frame{
-  \heading{Iterators}
-  
-  Unique way to traverse containers
-  
-  Unique way to apply iterative IO
-  
-  Unique way of expressing algorithms
-}
-
-\begin{frame}[fragile]{Example}
- \heading{Example -- basic use}
- \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
- for( auto iter = values.begin() ;
-      iter != values.end() ;
-      ++iter )
- {
-     cout << *iter << endl;
- }
- \end{lstlisting}
- \pause
-
- \vspace{2ex}
- C++11 - use range based for
- \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
-  for( auto v : values )
-  {
-      cout << v << endl;
-  }
- \end{lstlisting}
-
-\end{frame}
-
 
 
 \begin{frame}[fragile]
- \heading{Example -- Container traversal}
- \begin{onlyenv}<1>
- \begin{lstlisting}
-  list< double > values;
-  list< double > values2( values.size() );
- \end{lstlisting}
- \end{onlyenv}
- \begin{onlyenv}<2>
- \begin{lstlisting}
-  vector< double > values;
-  vector< double > values2( values.size() );
- \end{lstlisting}
- \end{onlyenv} 
- \vspace{2ex}
- Can be used in
- \begin{lstlisting}
-  transform( values.begin() , values.end() ,
-             values2.begin() ,
-             []( double x ) {
-                 return x * 2.0; } );
- \end{lstlisting}
-\end{frame}
+\heading{Motivation}
 
+Problem: Find the root of a function \hspace{2ex} $0=f(x)$
 
-
-
-\begin{frame}[fragile]
-  \heading{Examples -- IO}
-
-Input
-\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
-vector< double > values;  
-copy_if( istream_iterator< double >( cout ) ,
-         istream_iterator< double >() ,
-         back_inserter( values ) ,
-         []( double x ) { return x > 0.0; } );
-\end{lstlisting}
+\vspace{0.5ex}
+Newtons algorithm: \hspace{2ex} $x_{n+1} = x_n - f(x)/f'(x)$
 \vspace{2ex}
-Output
-\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
-vector< double > values;  
-// fill values
-copy_if( values.begin() , values.end() ,
-         ostream_iterator< double >( std::cout , "\n" ) ,
-         []( double x ) { return x > 0.0; } );
-\end{lstlisting}
+  \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+double x = 1.0;
+auto f = []( auto x ) { return exp( -x*x ) - 0.5 ; };
+auto df = []( auto x ) { return -2.0*x * exp( -x*x ); };
+while( std::abs( f(x) ) > 1.0e-12 ) {
+    cout << x << " " << f(x) << endl;
+    x = x - f(x) / df( x );
+}
+  \end{lstlisting}
+\vspace{2ex}
+Problems with this code?
 
+\pause
+\begin{itemize}
+ \item Not optimized. \pause -- Not today!
+ \item Raw loops. Sean Parent - ``No raw loops''
+ 
+ \vspace{0.5ex}
+ Use algorithms and iterators!
+\end{itemize}
+ 
 \end{frame}
+
 
 
 \begin{frame}[fragile]
- \heading{Examples -- Combine algorithms}
+ \heading{Motivation}
  
- Find a nice real life example.
+ Try to use iterators in three problems:
+ 
+ \begin{itemize}
+  \item Numerical Sequences
+  \item Dynamical systems
+  \item Convergence algorithms
+ \end{itemize}
+
 \end{frame}
 
+
+
+
+\begin{frame}[fragile]
+ \heading{Iterators}
+ 
+ \begin{itemize}
+  \item Traverse containers
+  \item IO 
+  \item Expressing algorithms
+ \end{itemize}
+
+\end{frame}
 
 
 \frame{
@@ -380,126 +355,20 @@ bool b = i < j;
 
 
 
-
-\frame{
-  \heading{Algorithms}
-  \tiny \tt
-  \begin{columns}[T]
-   \begin{column}{0.2\textwidth}
-      I all\_of \\
-      I any\_of \\
-      I none\_of \\
-      I for\_each \\
-      I count \\
-      I count\_if \\
-      I mismatch \\
-      I equal \\
-      I find \\
-      I find\_if \\
-      I find\_if\_not \\
-      F find\_end \\
-      I,F find\_first\_if \\
-      F adjacent\_find \\
-      F search \\
-      F search\_n \\
-      
-      I,O copy \\
-      I,O copy\_if \\
-      I,O copy\_n \\
-      B,O copy\_backward \\
-      I,O move \\
-      B,O move\_backward \\
-      F fill \\
-      F fill\_n \\
-      I,O transform \\
-      F generate \\
-      I generate\_n \\
-   \end{column}
-   \begin{column}{0.2\textwidth}
-      F remove \\
-      F remove\_if \\
-      I,O remove\_copy \\
-      I,O remove\_copy\_if \\
-      F replace \\
-      F replace\_if \\
-      I,O replace\_copy \\
-      I,O replace\_copy\_if \\
-      F swap\_ranges \\
-      F iter\_swap \\
-      B reverse \\
-      B,O reverse\_copy \\
-      F rotate \\
-      F,O rotate\_copy \\
-      R random\_shuffle \\
-      R shuffle \\
-      F unique \\
-      I,O unique\_copy
-   \end{column}
-   \begin{column}{0.3\textwidth}
-      I is\_partitioned \\
-      F,B partition \\
-      I,O partition\_copy \\
-      B stable\_partition \\
-      F partition\_point \\
-      F is\_sorted \\
-      F is\_sorted\_until \\
-      R sort \\
-      R partial\_sort \\
-      I,R partial\_sort\_copy \\
-      R stable\_sort \\
-      R nth\_element \\
-      \hrule
-      F lower\_bound \\
-      F upper\_bound \\
-      F binary\_search \\
-      F equal\_range \\
-      I,O merge \\
-      B inplace\_merge \\
-      I includes \\
-      I,O set\_difference \\
-      I,O set\_intersection \\
-      I,O set\_symmetric\_difference \\
-      I,O set\_unition 
-    \end{column}
-    \begin{column}{0.3\textwidth}
-      \hrule
-      R is\_heap \\
-      R is\_heap\_until \\
-      R make\_heap \\
-      R push\_heap \\
-      R pop\_heap \\
-      R sort\_heap \\
-      \hrule
-      F max\_element \\
-      F min\_element \\
-      F minmax\_element \\
-      I lexicographical\_compare \\
-      F is\_permutation \\
-      B next\_permutation \\
-      B prev\_permutation \\
-      \hrule
-      F iota \\
-      I accumulate \\
-      I inner\_product \\
-      I,O adjacent\_difference \\
-      I,O partial\_sum
-   \end{column}
-  \end{columns}
-
-
-}
-
-
 \begin{frame}[fragile]
   \heading{Ranges}
   
-  Simplifying iterators
-  
-  Generalization of iterators
-  
-  First defined in Boost
-  
-  Soon in the standard library?
+  \begin{itemize}
+   \item Simplifying iterators
+   \item Generalization of iterators
+   \item Ranges in boost
+   \begin{itemize}
+    \item Ranges are pairs of iterators.
+    \item Ranges can be decorated.
+    \item Memory overhead
+   \end{itemize}
+  \end{itemize}
+
 
   \begin{lstlisting}
 vector< double > values;
@@ -510,46 +379,146 @@ boost::for_each( values , []( double x ) { cout << x << endl; } );
 \end{frame}
 
 
-\frame{
- \heading{Ranges -- more examples from boost}
- 
- Filters
- 
- complicated algorithms
-}
 
-
-
-\frame{
-  \heading{Ranges in Boost}
-  
-  Ranges are pairs of iterators.
-  
-  Memory overhead
-  
-  Filters grow exponential in size
-}
 
 \frame{
   \heading{Ranges for the native C++}
-  
-  Introduces new concepts:
-  
-  Iterable, Container, Sentinel
-  
-  The range is the main abstraction not the iterator
-  
-  It holds all informations
-  
-  Concepts, asymmetric algorithms, sentinels have their own type.
- 
+
+  \begin{itemize}
+   \item Introduces new concepts:
+   \begin{itemize}
+    \item Iterable, Container, Sentinel
+   \end{itemize}
+   \item Range is the main abstraction not the iterator
+   \item Asymmetric algorithms - begin and end may have different types
+  \end{itemize}
 }
 
 
+\section{Problem 1 -- Numerical sequences}
 
-\section{Iterators and ranges for dynamical systems}
+\sectionslide{Numerical sequences}
 
-\sectionslide{Iterators and ranges for dynamical systems}
+\begin{frame}[fragile]
+ \heading{Numerical sequences}
+ 
+ In numerical algorithms one needs often sequences of numerical values
+ 
+ \begin{itemize}
+  \item As part of an algorithm
+  \item Reference data
+  \item Test data
+ \end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+ \heading{Numerical sequences}
+ 
+ \begin{onlyenv}<1>
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+int n = 1024;
+auto seq = boost::counting_range( 0 , n );
+for( auto x : seq )
+    cout << x << " ";
+\end{lstlisting}
+\vspace{2ex}Output
+
+\vspace{0.5ex}\lstinline$0 1 2 3 ...$
+ \end{onlyenv}
+  \begin{onlyenv}<2>
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+using namespace boost::adaptors;
+
+auto seq = boost::counting_range( 0 , n );
+auto seq2 = seq | transformed( []( auto x ) {
+    return 0.1 * static_cast< double >( x ); } );
+
+for( auto x : seq2 )
+    cout << x << " ";
+\end{lstlisting}
+\vspace{2ex}Output
+
+\vspace{0.5ex}\lstinline$0 0.1 0.2 0.3 ...$
+ \end{onlyenv}
+  \begin{onlyenv}<3>
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+auto seq = boost::counting_range( 0 , n );
+auto seq2 = seq | transformed( []( auto x ) {
+    return 0.01 * static_cast< double >( x ); } );
+auto seq3 = seq2 | transformed( []( auto x ) { return sin( 2.0 * x ) + 0.1; } );
+
+for( auto x : seq3 )
+    cout << x << " ";
+\end{lstlisting}
+\vspace{2ex}Output
+
+\vspace{0.5ex}\lstinline$0.1 0.298669 0.489418 0.664642 ...$
+ \end{onlyenv}
+  \begin{onlyenv}<4>
+Use a function:
+\begin{lstlisting}[basicstyle=\tiny\ttfamily]
+auto sequence( int n , double sampling , auto f ) {
+    auto seq = boost::counting_range( 0 , n );
+    auto seq2 = seq | boost::adaptors::transformed( [sampling,f]( auto x ) { 
+        return f( sampling * static_cast< double >( x ) ); } );
+}
+
+auto seq = sequence(1024 ,0.1 ,[]( auto x ) return sin(2.0*x)+0.1;} );
+for( auto x : seq )
+    cout << x << " ";
+\end{lstlisting}
+\vspace{2ex}Output
+
+\vspace{0.5ex}\lstinline$0.1 0.298669 0.489418 0.664642 ...$
+ \end{onlyenv}
+ \begin{onlyenv}<5>
+  More complicated sequence
+\begin{lstlisting}[basicstyle=\tiny\ttfamily]
+template< typename T >
+auto sequence2( int n , double sampling , T f )
+{
+    auto seq = boost::counting_range( 0 , n );
+    return seq | boost::adaptors::transformed( [sampling,f]( auto i ) {
+            double x = sampling * static_cast< double >( i );
+            return std::make_tuple( x , f( x ) ); } );
+
+}
+
+auto seq = sequence2( n , 0.1 , []( auto x ) { return sin( 2.0 * x ) + 0.1; 
+} );
+for( auto x : zseq )
+    cout << std::get< 0 >( x ) << " " << std::get< 1 >( x ) << "\n";
+\end{lstlisting}
+\vspace{2ex}Output
+
+\vspace{0.5ex}\lstinline$0 0.1$
+
+\vspace{0.5ex}\lstinline$0.1 0.298669$
+
+\vspace{0.5ex}\lstinline$0.2 0.489418$
+
+\vspace{0.5ex}\dots
+ \end{onlyenv}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \heading{Numerical ranges and Standard C++ Ranges}
+  
+  Advantages:
+  \begin{itemize}
+   \item The ranges are natively decorated, not the iterators.
+   \item Support for infinite ranges.
+  \end{itemize}
+
+ 
+\end{frame}
+
+
+\section{Problem 2 -- Dynamical systems}
+
+\sectionslide{Dynamical systems}
 
 \frame{
   \heading{Dynamical systems -- Maps}
@@ -567,45 +536,6 @@ boost::for_each( values , []( double x ) { cout << x << endl; } );
     \centerline{ 
 \includegraphics[draft=false,width=0.5\textwidth]{logistic_map}}
 }
-
-\frame{
-  \heading{Dynamical systems -- ODEs}
-  
-  \begin{displaymath}
-   \frac{\de x}{\de t} = f( x , t )
-  \end{displaymath}
-  
-  \vspace{2ex}
-  
-  Example: Lorenz attractor
-  
-  $$\dot{x} = \sigma(y-x ) \quad \text{,} \quad 
-\dot{y} = x ( \rho - z ) - y \quad \text{,} \quad \dot{z} = xy - \beta z$$
-
- \centerline{ 
-\includegraphics[draft=false,width=0.6\textwidth]{lorenz.jpg}}
-
-  Numerical solution: $x(t+\Delta t) = F( x(t) )$
-
-
-}
-
-\begin{frame}[fragile]
- 
-  \heading{Newton method}
-
-  Find the root: $0 = f(x)$
-  
-  \vspace{2ex}
-  
-  Newtons method
-  
-  \begin{itemize}
-   \item Choose $x_0$
-   \item Iterate $x_{n+1} = x_{n} - \frac{f(x_n)}{f'(x_n)}$
-  \end{itemize}
-
-\end{frame}
 
 
 \frame{
@@ -769,52 +699,9 @@ auto make_counted_map_range( T t , F f , size_t max_iterations )
         max_iterations );
 }
 \end{lstlisting}
- 
-
 
 \end{frame}
 
-
-
-\begin{frame}[fragile]
- \heading{Examples -- generalized iota}
- 
- Generalized Iota:
-\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
-size_t n = 10;
-auto iota = make_counted_map_range( 1 , []( auto x ) {
-    return x * 2; } , 10 );
-
-std::vector< int > values;
-boost::copy( iota_range , std::back_inserter( values ) );
-for( auto i : values ) { cout << i << endl; }
-\end{lstlisting}
-
-\end{frame}
-
-\begin{frame}[fragile]
-  \heading{Examples -- generalized iota}
-  
-  \textbf{Problem:} We can not easily generate a square iota:
- 
-  $1,4,9,16,25,36,...$
-    
-  \pause
- 
-  Introduce a projected map range.
-  
-  \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
-auto iota_range = make_projected_counted_map_range(
-    1 
-    , []( auto x ) { return x+1 ; }
-    , 11
-    , []( auto x ) { return x*x; }
-    );
-for( auto i : iota_range ) { std::cout << i << std::endl; }
-  \end{lstlisting}
-
-
-\end{frame}
 
 \begin{frame}[fragile]
 
@@ -828,6 +715,154 @@ for( auto x : range ) { cout << x << endl; }
 \end{lstlisting}
  
 \end{frame}
+
+
+
+\begin{frame}[fragile]
+ \heading{Dynamical system -- cellular automaton}
+ 
+ A cellular automaton is a time discrete and value discrete dynamical system
+ 
+ \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+  a
+ \end{lstlisting}
+
+\end{frame}
+
+
+
+\frame{
+  \heading{Dynamical systems -- ODEs}
+  
+  \begin{displaymath}
+   \frac{\de x}{\de t} = f( x , t )
+  \end{displaymath}
+  
+  \vspace{2ex}
+  
+  Example: Lorenz attractor
+  
+  $$\dot{x} = \sigma(y-x ) \quad \text{,} \quad 
+\dot{y} = x ( \rho - z ) - y \quad \text{,} \quad \dot{z} = xy - \beta z$$
+
+ \centerline{ 
+\includegraphics[draft=false,width=0.6\textwidth]{lorenz.jpg}}
+
+  Numerical solution: $x(t+\Delta t) = F( x(t) )$
+
+
+}
+
+
+\begin{frame}[fragile]
+  \heading{Example -- ODE solver}
+  
+  Solve $\dot{x} = f(x,t)$, Solver $F$ : $x(t+\delta t)=F(x(t))$
+  
+  Example \odeint:
+  
+\begin{lstlisting}[basicstyle=\tiny\ttfamily]
+namespace odeint = boost::numeric::odeint;
+
+auto lorenz = []( auto const& x , auto& dxdt , auto t )
+{
+    dxdt[0] = 10.0 * ( x[1] - x[0] );
+    dxdt[1] = 28.0 * x[0] - x[1] - x[0] * x[2];
+    dxdt[2] = -8.0 / 3.0 * x[2] + x[0] * x[1];
+};
+
+using state_type = std::array< double , 3 >;
+odeint::runge_kutta4< state_type > stepper;
+
+state_type x {{ 10.0 , 10.0 , 10.0 }};
+double t = 0.0 , dt = 0.01;
+stepper.do_step( lorenz , x , t , dt );
+t += dt;
+  \end{lstlisting}
+  
+Integrate functions:
+\begin{lstlisting}[basicstyle=\tiny\ttfamily]
+auto obs = []( auto x , auto t ) { std::cout << t << " " << x[0] << "\n"; };
+odeint::integrate_const( stepper , lorenz , x , 0.0 , 10.0 , dt , obs );
+\end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]
+ \heading{Example -- ODE solver}
+ 
+ \begin{lstlisting}[basicstyle=\tiny\ttfamily]
+auto make_ode_range( auto sys , auto stepper , auto x ,
+    auto t0 , auto dt , auto t1 )
+{
+    auto solve = [sys,stepper,dt]( auto x ) mutable { 
+        stepper.do_step( sys , x.first , x.second , dt );
+        x.second += dt;
+        return x; };
+    auto cond = [t1]( auto const& x ) { return x.second > t1; };
+    auto range = make_map_range( std::make_pair(x,t0) , solver , cond );
+    return range;
+}
+ \end{lstlisting}
+ 
+ Can be used as
+\begin{lstlisting}[basicstyle=\tiny\ttfamily]
+state_type x {{ 10.0 , 10.0 , 10.0 }};
+stepper_type stepper;
+auto range = make_ode_range( lorenz , stepper , x , 0.0 , 0.1 , 100.0 );
+
+for( auto r : range )
+    std::cout << r.second << " " << r.first[0] << " " << r.first[1] << "\n"; 
+\end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]
+ \heading{ODE ranges}
+ 
+ Superior to integrate functions:
+ \begin{itemize}
+  \item Break conditions are easy
+  \item ODE-Ranges can be used in a natural C++ way, {\tt find}, {\tt 
+transform} , etc.
+ \end{itemize}
+ 
+ Map implementation has drawbacks -> custom implementation
+ \begin{itemize}
+  \item Better performance.
+  \item Step size control -- complicated iteration.
+  \item Break condition can use the last two values.
+ \end{itemize}
+
+\end{frame}
+
+
+
+
+\section{Problem 3 -- Convergence methods}
+
+\sectionslide{Convergence methods}
+
+
+
+
+\begin{frame}[fragile]
+ 
+  \heading{Newton method}
+
+  Find the root: $0 = f(x)$
+  
+  \vspace{2ex}
+  
+  Newtons method
+  
+  \begin{itemize}
+   \item Choose $x_0$
+   \item Iterate $x_{n+1} = x_{n} - \frac{f(x_n)}{f'(x_n)}$
+  \end{itemize}
+
+\end{frame}
+
 
 
 \begin{frame}[fragile]
@@ -871,90 +906,297 @@ for( auto r : range )
 \end{frame}
 
 
-
-
-
 \begin{frame}[fragile]
-  \heading{Example -- ODE solver}
-  
-  Solve $\dot{x} = f(x,t)$, Solver $F$ : $x(t+\delta t)=F(x(t))$
-  
-  Example \odeint:
-  
-\begin{lstlisting}[basicstyle=\tiny\ttfamily]
-namespace odeint = boost::numeric::odeint;
-
-auto lorenz = []( auto const& x , auto& dxdt , auto t )
-{
-    dxdt[0] = 10.0 * ( x[1] - x[0] );
-    dxdt[1] = 28.0 * x[0] - x[1] - x[0] * x[2];
-    dxdt[2] = -8.0 / 3.0 * x[2] + x[0] * x[1];
-};
-
-using state_type = std::array< double , 3 >;
-odeint::runge_kutta4< state_type > stepper;
-
-state_type x {{ 10.0 , 10.0 , 10.0 }};
-double t = 0.0 , dt = 0.01;
-stepper.do_step( lorenz , x , t , dt );
-t += dt;
-  \end{lstlisting}
-  
-Integrate functions:
-\begin{lstlisting}[basicstyle=\tiny\ttfamily]
-auto obs = []( auto x , auto t ) { std::cout << t << " " << x[0] << "\n"; };
-odeint::integrate_const( stepper , lorenz , x , 0.0 , 10.0 , dt , obs );
-\end{lstlisting}
+ \heading{Similar problems}
+ 
+ \begin{itemize}
+  \item Optimizations methods
+  \begin{itemize}
+    \item Genetic algorithms, genetic programming, simulated annealing, \dots
+  \end{itemize}
+  \item Approximation of functions
+ \end{itemize}
 
 \end{frame}
 
-\begin{frame}[fragile]
- \heading{Example -- ODE Solver}
- 
- \begin{lstlisting}[basicstyle=\tiny\ttfamily]
-auto make_ode_range( auto sys , auto stepper , auto x ,
-    auto t0 , auto dt , auto t1 )
-{
-    auto solve = [sys,stepper,dt]( auto x ) mutable { 
-        stepper.do_step( sys , x.first , x.second , dt );
-        x.second += dt;
-        return x; };
-    auto cond = [t1]( auto const& x ) { return x.second > t1; };
-    auto range = make_map_range( std::make_pair(x,t0) , solver , cond );
-    return range;
+
+
+
+
+
+\section{Conclusion}
+
+\frame{
+  \heading{Conclusion}
+  
+  \begin{itemize}
+   \item Iterators and ranges can be used for numerical problems
+   \item For some problems they provide the correct abstraction
+   \item If it can be applied to all problems is not clear
+   \item The new range library for Standard C++ might ease a lot of things
+  \end{itemize}
+
 }
- \end{lstlisting}
- 
- Can be used as
-\begin{lstlisting}[basicstyle=\tiny\ttfamily]
-state_type x {{ 10.0 , 10.0 , 10.0 }};
-stepper_type stepper;
-auto range = make_ode_range( lorenz , stepper , x , 0.0 , 0.1 , 100.0 );
 
-for( auto r : range )
-    std::cout << r.second << " " << r.first[0] << " " << r.first[1] << "\n"; 
+
+
+\frame{
+  \heading{References}
+  
+  \begin{itemize}
+   \item odeint
+   \item github talk
+   \item github map range
+  \end{itemize}
+
+}
+
+
+
+
+
+
+
+\sectionslide{Backup}
+
+
+\begin{frame}[fragile]{Example}
+ \heading{Example -- basic use}
+ \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+ for( auto iter = values.begin() ;
+      iter != values.end() ;
+      ++iter )
+ {
+     cout << *iter << endl;
+ }
+ \end{lstlisting}
+ \pause
+
+ \vspace{2ex}
+ C++11 - use range based for
+ \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+  for( auto v : values )
+  {
+      cout << v << endl;
+  }
+ \end{lstlisting}
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+ \heading{Example -- Container traversal}
+ \begin{onlyenv}<1>
+ \begin{lstlisting}
+  list< double > values;
+  list< double > values2( values.size() );
+ \end{lstlisting}
+ \end{onlyenv}
+ \begin{onlyenv}<2>
+ \begin{lstlisting}
+  vector< double > values;
+  vector< double > values2( values.size() );
+ \end{lstlisting}
+ \end{onlyenv} 
+ \vspace{2ex}
+ Can be used in
+ \begin{lstlisting}
+  transform( values.begin() , values.end() ,
+             values2.begin() ,
+             []( double x ) {
+                 return x * 2.0; } );
+ \end{lstlisting}
+\end{frame}
+
+
+
+
+\begin{frame}[fragile]
+  \heading{Examples -- IO}
+
+Input
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+vector< double > values;  
+copy_if( istream_iterator< double >( cout ) ,
+         istream_iterator< double >() ,
+         back_inserter( values ) ,
+         []( double x ) { return x > 0.0; } );
+\end{lstlisting}
+\vspace{2ex}
+Output
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+vector< double > values;  
+// fill values
+copy_if( values.begin() , values.end() ,
+         ostream_iterator< double >( std::cout , "\n" ) ,
+         []( double x ) { return x > 0.0; } );
+\end{lstlisting}
+
+\end{frame}
+
+
+
+
+
+
+
+
+\frame{
+  \heading{Algorithms}
+  \tiny \tt
+  \begin{columns}[T]
+   \begin{column}{0.2\textwidth}
+      I all\_of \\
+      I any\_of \\
+      I none\_of \\
+      I for\_each \\
+      I count \\
+      I count\_if \\
+      I mismatch \\
+      I equal \\
+      I find \\
+      I find\_if \\
+      I find\_if\_not \\
+      F find\_end \\
+      I,F find\_first\_if \\
+      F adjacent\_find \\
+      F search \\
+      F search\_n \\
+      
+      I,O copy \\
+      I,O copy\_if \\
+      I,O copy\_n \\
+      B,O copy\_backward \\
+      I,O move \\
+      B,O move\_backward \\
+      F fill \\
+      F fill\_n \\
+      I,O transform \\
+      F generate \\
+      I generate\_n \\
+   \end{column}
+   \begin{column}{0.2\textwidth}
+      F remove \\
+      F remove\_if \\
+      I,O remove\_copy \\
+      I,O remove\_copy\_if \\
+      F replace \\
+      F replace\_if \\
+      I,O replace\_copy \\
+      I,O replace\_copy\_if \\
+      F swap\_ranges \\
+      F iter\_swap \\
+      B reverse \\
+      B,O reverse\_copy \\
+      F rotate \\
+      F,O rotate\_copy \\
+      R random\_shuffle \\
+      R shuffle \\
+      F unique \\
+      I,O unique\_copy
+   \end{column}
+   \begin{column}{0.3\textwidth}
+      I is\_partitioned \\
+      F,B partition \\
+      I,O partition\_copy \\
+      B stable\_partition \\
+      F partition\_point \\
+      F is\_sorted \\
+      F is\_sorted\_until \\
+      R sort \\
+      R partial\_sort \\
+      I,R partial\_sort\_copy \\
+      R stable\_sort \\
+      R nth\_element \\
+      \hrule
+      F lower\_bound \\
+      F upper\_bound \\
+      F binary\_search \\
+      F equal\_range \\
+      I,O merge \\
+      B inplace\_merge \\
+      I includes \\
+      I,O set\_difference \\
+      I,O set\_intersection \\
+      I,O set\_symmetric\_difference \\
+      I,O set\_unition 
+    \end{column}
+    \begin{column}{0.3\textwidth}
+      \hrule
+      R is\_heap \\
+      R is\_heap\_until \\
+      R make\_heap \\
+      R push\_heap \\
+      R pop\_heap \\
+      R sort\_heap \\
+      \hrule
+      F max\_element \\
+      F min\_element \\
+      F minmax\_element \\
+      I lexicographical\_compare \\
+      F is\_permutation \\
+      B next\_permutation \\
+      B prev\_permutation \\
+      \hrule
+      F iota \\
+      I accumulate \\
+      I inner\_product \\
+      I,O adjacent\_difference \\
+      I,O partial\_sum
+   \end{column}
+  \end{columns}
+
+
+}
+
+
+
+
+
+
+
+\begin{frame}[fragile]
+ \heading{Examples -- generalized iota}
+ 
+ Generalized Iota:
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+size_t n = 10;
+auto iota = make_counted_map_range( 1 , []( auto x ) {
+    return x * 2; } , 10 );
+
+std::vector< int > values;
+boost::copy( iota_range , std::back_inserter( values ) );
+for( auto i : values ) { cout << i << endl; }
 \end{lstlisting}
 
 \end{frame}
 
 \begin{frame}[fragile]
- \heading{ODE ranges}
+  \heading{Examples -- generalized iota}
+  
+  \textbf{Problem:} We can not easily generate a square iota:
  
- Superior to integrate functions:
- \begin{itemize}
-  \item Break conditions are easy
-  \item ODE-Ranges can be used in a natural C++ way, {\tt find}, {\tt 
-transform} , etc.
- \end{itemize}
+  $1,4,9,16,25,36,...$
+    
+  \pause
  
- But, the implementation has some drawbacks -> custom range implementations
- \begin{itemize}
-  \item Better performance.
-  \item Step size control -- complicated iteration.
-  \item Break condition can use the last two values.
- \end{itemize}
+  Introduce a projected map range.
+  
+  \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+auto iota_range = make_projected_counted_map_range(
+    1 
+    , []( auto x ) { return x+1 ; }
+    , 11
+    , []( auto x ) { return x*x; }
+    );
+for( auto i : iota_range ) { std::cout << i << std::endl; }
+  \end{lstlisting}
+
 
 \end{frame}
+
+
 
 
 \frame{
@@ -995,7 +1237,6 @@ transform} , etc.
 
 
 
-\section{Iterators for GPUs}
 
 \sectionslide{Iterators for GPUs algorithms}
 
@@ -1109,23 +1350,6 @@ double n = thrust::reduce(
   \heading{Solving an ensemble of low-dimensional ODEs}
   
   Lorenz example and ODEs
-}
-
-\section{Conclusion}
-
-\frame{
-  \heading{Conclusion}
-  
-  
-}
-
-\frame{
-  \heading{Outlook}
-}
-
-
-\frame{
-  \heading{References}
 }
 
 
