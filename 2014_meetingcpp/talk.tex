@@ -1048,7 +1048,7 @@ thrust::copy(d_vec.begin(), d_vec.end(), h_vec.begin());
 }
 
 
-\frame{
+\begin{frame}[fragile]
   \heading{Special iterators for Thrust}
 
   
@@ -1080,15 +1080,23 @@ double n = thrust::reduce(x.begin() ,x.end() ,0.0 ,op); // ?
 thrust::device_vector< double > x;
 // fill x
 
-op = []( auto x ) { return x; };
+op = []( auto x ) { return x*x; };
 double n = thrust::reduce(
-thrust::make_transform_iterator( x.begin() , op ) ,
-thrust::make_transform_iterator( x.end() , op ) , 0.0 ); // correct
+    thrust::make_transform_iterator(x.begin(), op) ,
+    thrust::make_transform_iterator(x.end(), op), 0.0);
+    // correct
   \end{lstlisting}
   \end{onlyenv}
 
 
 \end{frame}
+
+\begin{frame}
+  \heading{SAXPY}
+  
+  $s= a x + y$ \hspace{6ex} $s,x,y\in \mathbb{R}^N$, $a \in \mathbb{R}$
+\end{frame}
+
 
 \frame{
   \heading{Special problems - and solutions}
