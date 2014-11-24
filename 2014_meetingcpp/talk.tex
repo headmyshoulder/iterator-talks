@@ -210,9 +210,8 @@
 
 
 
-\section{Introduction}
+\section{Motivation and introduction}
 
-\sectionslide{Introduction}
 
 
 
@@ -283,6 +282,7 @@ Problems with this code?
   \centerline{\includegraphics[width=0.5\textwidth]{IteratorsOverview}}
 }
 
+\rem{
 \begin{frame}[fragile]
   \heading{Iterator types -- Concepts}
   
@@ -352,7 +352,7 @@ bool b = i < j;
     \end{column}
   \end{columns}
 \end{frame}
-
+}
 
 
 \begin{frame}[fragile]
@@ -370,9 +370,11 @@ bool b = i < j;
   \end{itemize}
 
 
-  \begin{lstlisting}
+  \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 vector< double > values;
-boost::for_each( values , []( double x ) { cout << x << endl; } );
+// fill values
+boost::for_each( values , []( auto x ) {
+    cout << x << endl; } );
   \end{lstlisting}
 
 
@@ -457,14 +459,15 @@ for( auto x : seq3 )
  \end{onlyenv}
   \begin{onlyenv}<4>
 Use a function:
-\begin{lstlisting}[basicstyle=\tiny\ttfamily]
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 auto sequence( int n , double sampling , auto f ) {
     auto seq = boost::counting_range( 0 , n );
-    auto seq2 = seq | boost::adaptors::transformed( [sampling,f]( auto x ) { 
-        return f( sampling * static_cast< double >( x ) ); } );
+    return seq | transformed( [sampling,f]( auto x ) { 
+        return f(sampling*static_cast<double>( x ) ); } );
 }
 
-auto seq = sequence(1024 ,0.1 ,[]( auto x ) return sin(2.0*x)+0.1;} );
+auto seq = sequence(1024 ,0.1 ,[]( auto x ) {
+    return sin(2.0*x)+0.1;} );
 for( auto x : seq )
     cout << x << " ";
 \end{lstlisting}
@@ -474,31 +477,26 @@ for( auto x : seq )
  \end{onlyenv}
  \begin{onlyenv}<5>
   More complicated sequence
-\begin{lstlisting}[basicstyle=\tiny\ttfamily]
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 template< typename T >
 auto sequence2( int n , double sampling , T f )
 {
     auto seq = boost::counting_range( 0 , n );
-    return seq | boost::adaptors::transformed( [sampling,f]( auto i ) {
-            double x = sampling * static_cast< double >( i );
-            return std::make_tuple( x , f( x ) ); } );
+    return seq | transformed( [sampling,f]( auto i ) {
+            double x = sampling*static_cast<double>( i );
+            return std::make_tuple(x,f(x)); } );
 
 }
 
-auto seq = sequence2( n , 0.1 , []( auto x ) { return sin( 2.0 * x ) + 0.1; 
-} );
+auto seq = sequence2( n , 0.1 , []( auto x ) {
+    return sin( 2.0 * x ) + 0.1; } );
 for( auto x : zseq )
-    cout << std::get< 0 >( x ) << " " << std::get< 1 >( x ) << "\n";
+    cout << "(" << std::get< 0 >( x ) << ","
+         << std::get< 1 >( x ) << ") ";
 \end{lstlisting}
 \vspace{2ex}Output
 
-\vspace{0.5ex}\lstinline$0 0.1$
-
-\vspace{0.5ex}\lstinline$0.1 0.298669$
-
-\vspace{0.5ex}\lstinline$0.2 0.489418$
-
-\vspace{0.5ex}\dots
+\vspace{0.5ex}\lstinline$(0,0.1) (0.1,0.298669) (0.2,0.489418) ...$
  \end{onlyenv}
 \end{frame}
 
