@@ -719,13 +719,33 @@ for( auto x : range ) { cout << x << endl; }
 \begin{frame}[fragile]
  \heading{Dynamical system -- cellular automaton}
  
- A cellular automaton is a time discrete and value discrete dynamical system
+ Cellular automaton: Time-discrete and value-discrete
  
- \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
-  a
+ \vspace{2ex}
+ Conway's Game of Life
+ 
+ \begin{itemize}
+  \item Each cell has two states: {\it alive} or {\it dead}
+  \item Transition rules
+  \begin{itemize}
+    \item Less then two neighbors -> dead (under-population)
+    \item Two or three neighbors -> alive 
+    \item More then three neighbors -> dead (over-population)
+    \item Dead cell with three neighbors -> alive (reproduction)
+  \end{itemize}
+ \end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+ \heading{Conway's game of life}
+ 
+ \begin{lstlisting}[basictyle=\scriptsize\ttfamily]
+abc
  \end{lstlisting}
 
 \end{frame}
+
 
 
 
@@ -864,7 +884,7 @@ transform} , etc.
 
 
 \begin{frame}[fragile]
- \heading{Example -- Newton method}
+ \heading{Newton method -- Implementation}
  
 \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 auto newton_range(
@@ -884,8 +904,11 @@ auto newton_range(
 
 
 \begin{frame}[fragile]
- \heading{Example -- Newton method}
+ \heading{Newton method -- Example}
  
+ Solve $\exp(-x^2) - 0.5 = 0$
+ 
+ \vspace{1ex}
 \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 auto f = []( auto x ) { return exp(-x*x) - 0.5; };
 auto df = []( auto x ) { return -2.0*x * exp(-x*x); };
@@ -897,6 +920,7 @@ auto range = newton_range( 1.0 , f , df , cond );
 for( auto r : range )
     std::cout << r << " : " << f( r ) << std::endl;
 \end{lstlisting}
+
 
  \centerline{ 
 \includegraphics[draft=false,width=0.5\textwidth]{newton1}} 
