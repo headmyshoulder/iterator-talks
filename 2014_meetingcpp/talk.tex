@@ -118,7 +118,7 @@
 % \subtitle[Iterators]{Solving ordinary differential equations in C++}
 \author[Karsten Ahnert]{Karsten Ahnert}
 \institute[Ambrosys]{Ambrosys GmbH, Potsdam}
-\date{\today}
+\date{December 6, 2014}
 %\logo{\pgfimage[width=2cm,height=2cm]{logo}}
 \titlegraphic{\includegraphics[width=4cm]{ambrosys}}
 \subject{Subject}
@@ -224,13 +224,15 @@ Problem: Find the root of a function \hspace{2ex} $0=f(x)$
 Newtons algorithm: \hspace{2ex} $x_{n+1} = x_n - f(x)/f'(x)$
 \vspace{2ex}
   \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+auto newton( auto x , auto f , auto df ) {
+    while( std::abs( f(x) ) > 1.0e-12 )
+        x = x - f(x) / df( x );
+    return x;
+}
 double x = 1.0;
 auto f = []( auto x ) { return exp( -x*x ) - 0.5 ; };
 auto df = []( auto x ) { return -2.0*x * exp( -x*x ); };
-while( std::abs( f(x) ) > 1.0e-12 ) {
-    cout << x << " " << f(x) << endl;
-    x = x - f(x) / df( x );
-}
+double root = newton( x , f , df );
   \end{lstlisting}
 \vspace{2ex}
 Problems with this code?
@@ -251,13 +253,17 @@ Problems with this code?
 \begin{frame}[fragile]
  \heading{Motivation}
  
- Try to use iterators in three problems:
+ Use iterator and ranges for three problems:
  
  \begin{itemize}
   \item Numerical Sequences
   \item Dynamical systems
   \item Convergence algorithms
  \end{itemize}
+ 
+ \vspace{2ex}
+ 
+ Range is a proxy for the algorithm!
 
 \end{frame}
 
@@ -384,15 +390,24 @@ boost::for_each( values , []( auto x ) {
 
 
 \frame{
-  \heading{Ranges for the native C++}
+  \heading{Ranges for the C++ standard library}
+  
+  Eric Niebler: N4128: Ranges for the Standard Library.
 
   \begin{itemize}
+   \item Ranges based on iterators
    \item Introduces new concepts:
    \begin{itemize}
-    \item Iterable, Container, Sentinel
+     \item Iterable -- Container, holding the elements 
+     \item Range -- Lightweight adapters (decorators)
    \end{itemize}
-   \item Range is the main abstraction not the iterator
-   \item Asymmetric algorithms - begin and end may have different types
+   \item Several variantes of each algorithm
+     \begin{itemize}
+       \item sort( in );     
+       \item sort( in.begin() , in.end() );
+       \item in | view::transform( op );
+       \item in | cont::sort( op );       
+     \end{itemize}
   \end{itemize}
 }
 
@@ -429,6 +444,7 @@ for( auto x : seq )
 \vspace{0.5ex}\lstinline$0 1 2 3 ...$
  \end{onlyenv}
   \begin{onlyenv}<2>
+  Range is a proxy object for the sequence
 \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 using namespace boost::adaptors;
 
@@ -444,6 +460,7 @@ for( auto x : seq2 )
 \vspace{0.5ex}\lstinline$0 0.1 0.2 0.3 ...$
  \end{onlyenv}
   \begin{onlyenv}<3>
+  Range is a proxy object for the sequence
 \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 auto seq = boost::counting_range( 0 , n );
 auto seq2 = seq | transformed( []( auto x ) {
@@ -458,7 +475,7 @@ for( auto x : seq3 )
 \vspace{0.5ex}\lstinline$0.1 0.298669 0.489418 0.664642 ...$
  \end{onlyenv}
   \begin{onlyenv}<4>
-Use a function:
+Use a function
 \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 auto sequence( int n , double sampling , auto f ) {
     auto seq = boost::counting_range( 0 , n );
@@ -502,7 +519,7 @@ for( auto x : zseq )
 
 
 \begin{frame}[fragile]
-  \heading{Numerical ranges and Standard C++ Ranges}
+  \heading{Numerical ranges and standard C++ Ranges}
   
   Advantages:
   \begin{itemize}
@@ -740,8 +757,15 @@ for( auto x : range ) { cout << x << endl; }
 \begin{frame}[fragile]
  \heading{Conway's game of life}
  
- \begin{lstlisting}[basictyle=\scriptsize\ttfamily]
-abc
+ \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+static const size_t dim_x = 32;
+static const size_t dim_y = 16;
+using board = array< array< bool , dim_x > , dim_y >;
+
+board get_empty_board( void ) { ... }
+void show_board( board const& b ) { ... }
+board next( board const& b ) { ... }
+
  \end{lstlisting}
 
 \end{frame}
