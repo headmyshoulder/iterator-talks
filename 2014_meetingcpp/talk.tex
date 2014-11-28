@@ -760,14 +760,18 @@ for( auto x : range ) { cout << x << endl; }
  \heading{Conway's game of life}
  
  \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
-static const size_t dim_x = 32;
-static const size_t dim_y = 16;
-using board = array< array< bool , dim_x > , dim_y >;
+using board = vector< vector< bool > >;
 
-board get_empty_board( void ) { ... }
-void show_board( board const& b ) { ... }
-board next( board const& b ) { ... }
+auto show_board = []( board const& b ) { ... }
+auto next_board = []( board const& b ) -> board { ... }
 
+board b;
+// initialize b
+auto r = make_counted_map_range( b , next_board , 1000 );
+for( auto b : r )
+{
+    show_board( b );
+}
  \end{lstlisting}
 
 \end{frame}

@@ -7,7 +7,6 @@
  *
  */
 
-
 #include <iostream>
 #include <array>
 #include <thread>
@@ -95,6 +94,8 @@ int main( int argc , char *argv[] )
     b[10][10] = true;
     b[10][11] = true;
     b[10][12] = true;
+
+auto r = 
 
     for( size_t i=0 ; i<100 ; ++i )
     {
