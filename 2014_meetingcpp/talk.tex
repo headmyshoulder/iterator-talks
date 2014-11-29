@@ -725,11 +725,16 @@ auto make_counted_map_range( T t , F f , size_t max_iterations )
 \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 double r = 3.2;
 auto l = [r]( auto x ) {return r * x * ( 1.0 - x ); };
+
 auto range = make_counted_map_range( 0.5 , l , 1000 );
-for( auto x : range ) { cout << x << endl; }
+for( auto x : range )
+{
+    cout << x << endl;
+}
 \end{lstlisting}
- 
+
 \end{frame}
+
 
 
 
@@ -767,6 +772,7 @@ auto next_board = []( board const& b ) -> board { ... }
 
 board b;
 // initialize b
+
 auto r = make_counted_map_range( b , next_board , 1000 );
 for( auto b : r )
 {
@@ -777,6 +783,18 @@ for( auto b : r )
 \end{frame}
 
 
+\begin{frame}[fragile]
+ \heading{Map range for time discrete dynamical systems}
+ 
+ \begin{itemize}
+  \item Proxy for a dynamical system
+  \item Customizable iteration body
+  \item Custom stopping criterions
+  \item $N$-times iteration
+  \item Not optimized - in real world a custom range would fit better.
+ \end{itemize}
+
+\end{frame}
 
 
 \frame{
