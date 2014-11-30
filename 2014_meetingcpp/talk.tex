@@ -218,8 +218,6 @@
 \begin{frame}[fragile]
 \heading{Motivation}
 
-USE RK4?
-
 Problem: Find the root of a function \hspace{2ex} $0=f(x)$
 
 \vspace{0.5ex}
@@ -237,17 +235,17 @@ auto df = []( auto x ) { return -2.0*x * exp( -x*x ); };
 double root = newton( x , f , df );
   \end{lstlisting}
 \vspace{2ex}
-Problems with this code?
 
 \pause
-\begin{itemize}
- \item Not optimized. \pause -- Not today!
- \item Raw loops. Sean Parent - ``No raw loops''
- 
- \vspace{0.5ex}
- Use algorithms and iterators!
-\end{itemize}
- 
+Idea -- Return a range, that the user can iterate:
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+auto newton( auto x , auto f , auto df ) { ... }
+double x = 1.0;
+auto range = newton( x , f , df );
+for( auto x : range ) cout << x << endl;
+cout << "Final value: " << range.value() << endl;
+\end{lstlisting}
+
 \end{frame}
 
 
@@ -266,6 +264,11 @@ Problems with this code?
  \vspace{2ex}
  
  The range is here a proxy for the algorithm!
+ 
+ \vspace{2ex}
+ The user can look inside the algorithm!
+ 
+ $\longrightarrow$ Debuggin, loging, combine with other algorithms, \dots
 
 \end{frame}
 
@@ -511,6 +514,7 @@ for( auto x : seq )
 
 \vspace{0.5ex}\lstinline$0.1 0.298669 0.489418 0.664642 ...$
  \end{onlyenv}
+ \rem{
  \begin{onlyenv}<5>
   More complicated sequence
 \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
@@ -533,7 +537,23 @@ for( auto x : zseq )
 
 \vspace{0.5ex}\lstinline$(0,0.1) (0.1,0.298669) (0.2,0.489418) ...$
  \end{onlyenv}
+ }
 \end{frame}
+
+\begin{frame}[fragile]
+  \heading{Combining numerical sequences}
+
+  Zip sequences
+  \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+using std::view;
+  \end{lstlisting}
+  
+  Append sequences?
+  
+  Cartesian sequences?
+
+\end{frame}
+
 
 
 \begin{frame}[fragile]
