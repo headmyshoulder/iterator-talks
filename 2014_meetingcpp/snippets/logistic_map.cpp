@@ -47,7 +47,8 @@ private:
 
 int main( int argc , char *argv[] )
 {
-    for( double r = 0.0 ; r < 4.0 ; r += 0.001 )
+    cout.precision( 14 );
+    for( double r = 2.8 ; r < 4.0 ; r += 0.001 )
     {
         double x = 0.5;
         for( size_t i=0 ; i<10000 ; ++i )
@@ -55,21 +56,22 @@ int main( int argc , char *argv[] )
             x = logistic_map( x , r );
         }
 
-        binner bins( 2000 );
-        for( size_t i=0 ; i<1000 ; ++i )
+        // binner bins( 4000 );
+        for( size_t i=0 ; i<2000 ; ++i )
         {
             x = logistic_map( x , r );
-            bins( x );
+//             bins( x );
+            cout << r << " " << x << "\n";
         }
 
 
-        for( size_t i=0 ; i<bins.size() ; ++i )
-        {
-            if( bins.is_bin( i ) )
-            {
-                cout << r << " " << bins.bin_value( i ) << "\n";
-            }
-        }
+        // for( size_t i=0 ; i<bins.size() ; ++i )
+        // {
+        //     if( bins.is_bin( i ) )
+        //     {
+        //         cout << r << " " << bins.bin_value( i ) << "\n";
+        //     }
+        // }
     }
     return 0;
 }

@@ -218,6 +218,8 @@
 \begin{frame}[fragile]
 \heading{Motivation}
 
+USE RK4?
+
 Problem: Find the root of a function \hspace{2ex} $0=f(x)$
 
 \vspace{0.5ex}
@@ -253,7 +255,7 @@ Problems with this code?
 \begin{frame}[fragile]
  \heading{Motivation}
  
- Use iterator and ranges for three problems:
+ Use iterators and ranges for three problems:
  
  \begin{itemize}
   \item Numerical Sequences
@@ -263,7 +265,7 @@ Problems with this code?
  
  \vspace{2ex}
  
- Range is a proxy for the algorithm!
+ The range is here a proxy for the algorithm!
 
 \end{frame}
 
@@ -271,19 +273,31 @@ Problems with this code?
 
 
 \begin{frame}[fragile]
- \heading{Iterators}
+ \heading{Iterators -- Overview}
  
+ Operations
  \begin{itemize}
-  \item Traverse containers
-  \item IO 
-  \item Expressing algorithms
+   \item Increment, dereference, assign, copy, decrement, \dots
  \end{itemize}
+ 
+ \vspace{2ex}
+ Use cases
+ \begin{itemize}
+   \item Traverse containers, IO, expressing algorithms
+ \end{itemize}
+
+ \vspace{2ex}
+ Special iterators
+ \begin{itemize}
+  \item \lstinline$zip_iterator$, \lstinline$transform_iterator$, \dots
+ \end{itemize}
+
 
 \end{frame}
 
 
 \frame{
-  \heading{Iterator types -- Concepts}
+  \heading{Iterator concepts}
   
   \centerline{\includegraphics[width=0.5\textwidth]{IteratorsOverview}}
 }
@@ -365,13 +379,12 @@ bool b = i < j;
   \heading{Ranges}
   
   \begin{itemize}
-   \item Simplifying iterators
+   \item Simplify the usage of iterators
    \item Generalization of iterators
-   \item Ranges in boost
+   \item Ranges in boost:
    \begin{itemize}
     \item Ranges are pairs of iterators.
-    \item Ranges can be decorated.
-    \item Memory overhead
+    \item Ranges can be adapted/decorated.
    \end{itemize}
   \end{itemize}
 
@@ -395,13 +408,19 @@ boost::for_each( values , []( auto x ) {
   Eric Niebler: N4128: Ranges for the Standard Library.
 
   \begin{itemize}
-   \item Ranges based on iterators
-   \item Introduces new concepts:
+   \item Ranges are based on iterators
+   \item New concepts:
    \begin{itemize}
      \item Iterable -- Container, holding the elements 
      \item Range -- Lightweight adapters (decorators)
    \end{itemize}
-   \item Several variantes of each algorithm
+   \item Three kinds of ranges
+   \begin{itemize}
+    \item Iterator pairs, Iterator and a count, Iterator and a 
+predicate
+   \end{itemize}
+
+   \item Variants of each algorithm
      \begin{itemize}
        \item sort( in );     
        \item sort( in.begin() , in.end() );
@@ -495,8 +514,7 @@ for( auto x : seq )
  \begin{onlyenv}<5>
   More complicated sequence
 \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
-template< typename T >
-auto sequence2( int n , double sampling , T f )
+auto sequence2( int n , double sampling , auto f )
 {
     auto seq = boost::counting_range( 0 , n );
     return seq | transformed( [sampling,f]( auto i ) {
@@ -521,13 +539,30 @@ for( auto x : zseq )
 \begin{frame}[fragile]
   \heading{Numerical ranges and standard C++ Ranges}
   
-  Advantages:
-  \begin{itemize}
-   \item The ranges are natively decorated, not the iterators.
-   \item Support for infinite ranges.
-  \end{itemize}
+  Infinite sequences:
+  
+  \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+using std::view;
+auto sequence( double sampling , auto f ) {
+    return iota(0) | transform( [sampling,f]( auto x ) {
+        return f( sampling * x ); } );
+}
 
- 
+for( auto x : take( sequence( 0.1 , f ) , 10 ) )
+    cout << x << endl;
+  \end{lstlisting}
+  
+  \vspace{2ex}
+  Custom break conditions:
+  \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+auto seq = take_while( sequence( 0.1 , f ) , []( auto x ) {
+    return x < 1.0; } );
+for( auto x : seq )
+    cout << x << endl;
+  \end{lstlisting}
+
+
+  
 \end{frame}
 
 
@@ -538,6 +573,7 @@ for( auto x : zseq )
 \frame{
   \heading{Dynamical systems -- Maps}
   
+  Map -- time discrete dynamical system:
   \begin{displaymath}
    x_{n+1} = f( x_n )
   \end{displaymath}
@@ -569,32 +605,6 @@ for( auto x : zseq )
   
   Models the SinglePassRange concept
 }
-
-\begin{frame}[fragile]
-  \heading{Map range -- implementation}
-  
-  \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
-template< typename T1 , ... > class map_range
-{
-    struct iterator { ... };
- public:
-    // ...
-    iterator begin() { return iterator( this ); }
-    iterator end() { return iterator( nullptr ); }
-    // ...
-};
-   \end{lstlisting}
-   
-   Range algorithms redirect to iterator algorithms:
-   \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
-template< typename R , typename F >
-void for_each( R const& r , F f ) {
-    std::for_each( r.begin() , e.end() , f );
-}
-   \end{lstlisting}
-
-
-\end{frame}
 
 
 
@@ -658,36 +668,6 @@ struct iterator {
 \end{frame}
 
 
-
-\begin{frame}[fragile]
-  \heading{Counted map range}
-  
-\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
-template< typename T , typename F >
-class counted_map_range
-{
-    struct iterator { ... };
-    
-public:
-    counted_map_range( T value , F func , size_t max_iterations )
-    : m_current_iteration { 0 }
-    , m_max_iterations { max_iterations }
-    , m_value { std::move( value ) }
-    , m_func { std::move( func ) }
-    {}
-    
-    iterator begin() const { return iterator( this ); }
-    iterator end( void ) { return iterator( nullptr ); }
-    
-private:
-    mutable size_t m_current_iteration = 0;
-    const size_t m_max_iterations;
-    mutable T m_value;
-    mutable F m_func;
-};
-\end{lstlisting}
-
-\end{frame}
 
 
 \begin{frame}[fragile]
@@ -756,10 +736,34 @@ for( auto x : range )
     \item Dead cell with three neighbors -> alive (reproduction)
   \end{itemize}
  \end{itemize}
- 
- Pictures
 
 \end{frame}
+
+\begin{frame}[fragile]
+ \heading{Game of life -- patterns}
+ 
+ Still lifes:
+\hspace{2ex}
+\includegraphics[draft=false,width=0.1\textwidth]
+{66px-Game_of_life_block_with_border.png}
+\hspace{2ex}
+\includegraphics[draft=false,width=0.148485\textwidth]
+{98px-Game_of_life_beehive.png}
+\hspace{2ex}
+\includegraphics[draft=false,width=0.12424\textwidth]
+{82px-Game_of_life_boat.png}
+\hspace{2ex}
+\includegraphics[draft=false,width=0.148485\textwidth]
+{98px-Game_of_life_loaf.png}
+
+Oscillators:
+\hspace{2ex}
+% \includegraphics[draft=false,width=0.1\textwidth]
+% {Game_of_life_blinker.gif}
+
+
+\end{frame}
+
 
 \begin{frame}[fragile]
  \heading{Conway's game of life}
@@ -787,11 +791,13 @@ for( auto b : r )
  \heading{Map range for time discrete dynamical systems}
  
  \begin{itemize}
-  \item Proxy for a dynamical system
-  \item Customizable iteration body
-  \item Custom stopping criterions
-  \item $N$-times iteration
-  \item Not optimized - in real world a custom range would fit better.
+  \item The range is a proxy for the dynamical system
+  \begin{itemize}
+    \item Customizable iteration body
+    \item Custom stopping criterions
+    \item $N$-times iteration
+  \end{itemize}
+  \item Not optimized - a custom range could be optimized
  \end{itemize}
 
 \end{frame}
@@ -893,6 +899,7 @@ for( auto r : range )
 transform} , etc.
  \end{itemize}
  
+ \vspace{2ex}
  Map implementation has drawbacks -> custom implementation
  \begin{itemize}
   \item Better performance.
@@ -982,9 +989,14 @@ for( auto r : range )
  \begin{itemize}
   \item Optimizations methods
   \begin{itemize}
-    \item Genetic algorithms, genetic programming, simulated annealing, \dots
+    \item Broyden-Fletcher-Goldfarb-Shanno algorithm (BFGS)
+    \item Simulated annealing
+    \item Genetic algorithms
+    \item Genetic programming
+    \item \dots
   \end{itemize}
   \item Approximation of functions
+  \item \dots
  \end{itemize}
 
 \end{frame}
@@ -1000,11 +1012,21 @@ for( auto r : range )
   \heading{Conclusion}
   
   \begin{itemize}
-   \item Iterators and ranges can be used for numerical problems
-   \item For some problems they provide the correct abstraction
-   \item If it can be applied to all problems is not clear
-   \item The new range library for Standard C++ might ease a lot of things
+    \item Iterators and ranges can be used for numerical problems
+    \begin{itemize}
+      \item Numerical sequences, dynamical systems, optimization methods, ...
+    \end{itemize}
+    \item Range is a proxy for the algorithm
+    \item Custom range implementation needed for optimal performance
   \end{itemize}
+  
+  \vspace{2ex}
+  Outlook -- open points
+  \begin{itemize}
+    \item Break condition on last two values, e.g. $|v_{k}-v_{k-1}| < \epsilon$
+    \item More complicated break condition,\\e.g. count and predicate
+  \end{itemize}
+
 
 }
 
