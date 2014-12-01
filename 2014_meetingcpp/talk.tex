@@ -229,18 +229,16 @@ auto newton( auto x , auto f , auto df ) {
         x = x - f(x) / df( x );
     return x;
 }
-double x = 1.0;
-auto f = []( auto x ) { return exp( -x*x ) - 0.5 ; };
-auto df = []( auto x ) { return -2.0*x * exp( -x*x ); };
+// ...
 double root = newton( x , f , df );
   \end{lstlisting}
 \vspace{2ex}
 
 \pause
-Idea -- Return a range, that the user can iterate:
+Idea -- Return a range
 \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 auto newton( auto x , auto f , auto df ) { ... }
-double x = 1.0;
+// ...
 auto range = newton( x , f , df );
 for( auto x : range ) cout << x << endl;
 cout << "Final value: " << range.value() << endl;
@@ -268,7 +266,7 @@ cout << "Final value: " << range.value() << endl;
  \vspace{2ex}
  The user can look inside the algorithm!
  
- $\longrightarrow$ Debuggin, loging, combine with other algorithms, \dots
+ $\longrightarrow$ Debuggin, logging, combine with other algorithms, \dots
 
 \end{frame}
 
@@ -541,23 +539,7 @@ for( auto x : zseq )
 \end{frame}
 
 \begin{frame}[fragile]
-  \heading{Combining numerical sequences}
-
-  Zip sequences
-  \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
-using std::view;
-  \end{lstlisting}
-  
-  Append sequences?
-  
-  Cartesian sequences?
-
-\end{frame}
-
-
-
-\begin{frame}[fragile]
-  \heading{Numerical ranges and standard C++ Ranges}
+  \heading{Numerical ranges and standard C++ ranges}
   
   Infinite sequences:
   
@@ -580,10 +562,36 @@ auto seq = take_while( sequence( 0.1 , f ) , []( auto x ) {
 for( auto x : seq )
     cout << x << endl;
   \end{lstlisting}
-
-
   
 \end{frame}
+
+
+\begin{frame}[fragile]
+  \heading{Numerical Ranges and standard C++ ranges}
+
+  Zip sequences:
+  \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+using std::view;
+auto seq1 = sequence( 1024 , 0.01 , f1 );
+auto seq2 = sequence( 1024 , 0.01 , f2 );
+auto seq3 = zip( seq1 , seq2 );
+for( auto x : seq3 )
+    cout << std::get<0>(x) << " "<< std::get<1>(x) << "\n";
+  \end{lstlisting}
+  
+  \vspace{2ex}
+  Append sequences:
+  \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+auto seq3 = join( seq1 , seq2 );
+  \end{lstlisting}
+  
+  \vspace{2ex}
+  Cartesian sequences -- missing yet
+
+\end{frame}
+
+
+
 
 
 \section{Problem 2 -- Dynamical systems}
@@ -1056,9 +1064,9 @@ for( auto r : range )
   \heading{References}
   
   \begin{itemize}
-   \item odeint
-   \item github talk
-   \item github map range
+   \item \url{www.odeint.com}
+   \item \url{github.com/headmyshoulder/iterator-talks}
+   \item \url{github.com/headmyshoulder/map_iterator}
   \end{itemize}
 
 }
