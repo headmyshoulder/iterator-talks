@@ -2,6 +2,7 @@
 
 \usepackage{beamerthemesplit}
 \usepackage{graphicx}
+\usepackage{animate}
 \usepackage{subfigure}
 \usepackage{amsmath,amssymb}
 \usepackage{multimedia}
@@ -114,8 +115,7 @@
 
 % Meta
 
-\title[Iteratorst]{Iterators and Ranges for numerical problems}
-% \subtitle[Iterators]{Solving ordinary differential equations in C++}
+\title[Iteratorst]{Iterators and ranges for numerical problems}
 \author[Karsten Ahnert]{Karsten Ahnert}
 \institute[Ambrosys]{Ambrosys GmbH, Potsdam}
 \date{December 6, 2014}
@@ -235,7 +235,7 @@ double root = newton( x , f , df );
 \vspace{2ex}
 
 \pause
-Idea -- Return a range
+Idea: Return a range
 \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 auto newton( auto x , auto f , auto df ) { ... }
 // ...
@@ -266,7 +266,7 @@ cout << "Final value: " << range.value() << endl;
  \vspace{2ex}
  The user can look inside the algorithm!
  
- $\longrightarrow$ Debuggin, logging, combine with other algorithms, \dots
+ $\longrightarrow$ Debugging, logging, combine with other algorithms, \dots
 
 \end{frame}
 
@@ -380,8 +380,7 @@ bool b = i < j;
   \heading{Ranges}
   
   \begin{itemize}
-   \item Simplify the usage of iterators
-   \item Generalization of iterators
+   \item Simplification and generalization of iterators
    \item Ranges in boost:
    \begin{itemize}
     \item Ranges are pairs of iterators.
@@ -396,6 +395,16 @@ vector< double > values;
 boost::for_each( values , []( auto x ) {
     cout << x << endl; } );
   \end{lstlisting}
+  
+  \vspace{2ex}
+  Operations on ranges:
+  \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+range_t r;
+using iterator = boost::range_iterator< range_t >::type;
+auto begin = boost::begin( r ); // begin iterator
+auto end = boost::end( r );     // end iterator
+  \end{lstlisting}
+
 
 
 \end{frame}
@@ -423,13 +432,17 @@ predicate
 
    \item Variants of each algorithm
      \begin{itemize}
-       \item sort( in );     
        \item sort( in.begin() , in.end() );
+       \item sort( in );
        \item in | view::transform( op );
        \item in | cont::sort( op );       
      \end{itemize}
   \end{itemize}
 }
+
+
+
+
 
 
 \section{Problem 1 -- Numerical sequences}
@@ -446,6 +459,15 @@ predicate
   \item Reference data
   \item Test data
  \end{itemize}
+ 
+ \vspace{2ex}
+ Example: Sampled function $f(x)$
+ \begin{align*}
+  t_n & = & 0.1 n & \quad \quad & \textrm{(Sampling)} & \quad 
+\quad \quad \quad \quad \\
+  x_n & = & \sin( 2 t_n ) + 0.1 & & \textrm{(Numerical sequence -- sampled 
+function)} &
+ \end{align*}
 
 \end{frame}
 
@@ -453,6 +475,7 @@ predicate
  \heading{Numerical sequences}
  
  \begin{onlyenv}<1>
+Range of integers
 \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 int n = 1024;
 auto seq = boost::counting_range( 0 , n );
@@ -464,7 +487,7 @@ for( auto x : seq )
 \vspace{0.5ex}\lstinline$0 1 2 3 ...$
  \end{onlyenv}
   \begin{onlyenv}<2>
-  Range is a proxy object for the sequence
+Sampling
 \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 using namespace boost::adaptors;
 
@@ -480,12 +503,13 @@ for( auto x : seq2 )
 \vspace{0.5ex}\lstinline$0 0.1 0.2 0.3 ...$
  \end{onlyenv}
   \begin{onlyenv}<3>
-  Range is a proxy object for the sequence
+Sampled function
 \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 auto seq = boost::counting_range( 0 , n );
 auto seq2 = seq | transformed( []( auto x ) {
     return 0.01 * static_cast< double >( x ); } );
-auto seq3 = seq2 | transformed( []( auto x ) { return sin( 2.0 * x ) + 0.1; } );
+auto seq3 = seq2 | transformed( []( auto x ) {
+    return sin( 2.0 * x ) + 0.1; } );
 
 for( auto x : seq3 )
     cout << x << " ";
@@ -569,7 +593,7 @@ for( auto x : seq )
 \begin{frame}[fragile]
   \heading{Numerical Ranges and standard C++ ranges}
 
-  Zip sequences:
+  Zipped sequences:
   \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 using std::view;
 auto seq1 = sequence( 1024 , 0.01 , f1 );
@@ -580,7 +604,7 @@ for( auto x : seq3 )
   \end{lstlisting}
   
   \vspace{2ex}
-  Append sequences:
+  Joined sequences:
   \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 auto seq3 = join( seq1 , seq2 );
   \end{lstlisting}
@@ -630,8 +654,6 @@ auto seq3 = join( seq1 , seq2 );
    \item {\tt map\_range} - stop predicate 
    \item {\tt counted\_map\_range} - iterates $n$-times
   \end{enumerate}
-  
-  Models the SinglePassRange concept
 }
 
 
@@ -770,24 +792,32 @@ for( auto x : range )
 \begin{frame}[fragile]
  \heading{Game of life -- patterns}
  
- Still lifes:
-\hspace{2ex}
-\includegraphics[draft=false,width=0.1\textwidth]
-{66px-Game_of_life_block_with_border.png}
-\hspace{2ex}
+\begin{tabular}{lllll}
+ Still lifes: \vspace{2ex} & \includegraphics[draft=false,width=0.1\textwidth]
+{66px-Game_of_life_block_with_border.png} & 
 \includegraphics[draft=false,width=0.148485\textwidth]
-{98px-Game_of_life_beehive.png}
-\hspace{2ex}
+{98px-Game_of_life_beehive.png} &
 \includegraphics[draft=false,width=0.12424\textwidth]
-{82px-Game_of_life_boat.png}
-\hspace{2ex}
+{82px-Game_of_life_boat.png} &
 \includegraphics[draft=false,width=0.148485\textwidth]
-{98px-Game_of_life_loaf.png}
+{98px-Game_of_life_loaf.png} \\
+ Oscillators:\vspace{2ex}  & 
+\includegraphics[draft=false,width=0.12424\textwidth]{blinker_0.png} &
+\includegraphics[draft=false,width=0.148485\textwidth]{toad_0.png} &
+\includegraphics[draft=false,width=0.148485\textwidth]{pulsar_0.png} 
+& 
+\\
+Spaceships: &
+\includegraphics[draft=false,width=0.148485\textwidth]{glider_13.png} &
+\includegraphics[draft=false,width=0.148485\textwidth]{lwss_0.png} &
+&
+\end{tabular}
 
-Oscillators:
-\hspace{2ex}
-% \includegraphics[draft=false,width=0.1\textwidth]
-% {Game_of_life_blinker.gif}
+\vspace{4ex}
+Game of life can implement a Touring machine :)
+
+
+
 
 
 \end{frame}
