@@ -220,27 +220,48 @@
 
 Problem: Find the root of a function \hspace{2ex} $0=f(x)$
 
+\pause
+
 \vspace{0.5ex}
 Newtons algorithm: \hspace{2ex} $x_{n+1} = x_n - f(x)/f'(x)$
+
+\pause
+
 \vspace{2ex}
   \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
-auto newton( auto x , auto f , auto df ) {
+template< typename T , typename F , typename DF >
+auto newton( T x , F f , DF df )
+{
     while( std::abs( f(x) ) > 1.0e-12 )
         x = x - f(x) / df( x );
     return x;
-}
+};
 // ...
 double root = newton( x , f , df );
   \end{lstlisting}
 \vspace{2ex}
 
-\pause
-Idea: Return a range
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+ \heading{Motviation}
+ 
+
+Idea: Express the algorithm as a range
 \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
-auto newton( auto x , auto f , auto df ) { ... }
-// ...
-auto range = newton( x , f , df );
-for( auto x : range ) cout << x << endl;
+template< typename T , typename F , typename DF >
+auto newton_range( T x , F f , DF df ) { ... };
+
+// range is a lazy Newton algorithm
+auto range = newton( x , f , df );   
+
+// perform the iteration
+for( auto x : range )
+{
+    cout << x << endl;
+}
 cout << "Final value: " << range.value() << endl;
 \end{lstlisting}
 
@@ -248,10 +269,12 @@ cout << "Final value: " << range.value() << endl;
 
 
 
+
+
 \begin{frame}[fragile]
  \heading{Motivation}
  
- Use iterators and ranges for three problems:
+ Use ranges for three problems:
  
  \begin{itemize}
   \item Numerical Sequences
@@ -297,13 +320,7 @@ cout << "Final value: " << range.value() << endl;
 \end{frame}
 
 
-\frame{
-  \heading{Iterator concepts}
-  
-  \centerline{\includegraphics[width=0.5\textwidth]{IteratorsOverview}}
-}
 
-\rem{
 \begin{frame}[fragile]
   \heading{Iterator types -- Concepts}
   
@@ -315,6 +332,19 @@ cout << "Final value: " << range.value() << endl;
     \end{column}
     \begin{column}{0.55\textwidth}
       \begin{onlyenv}<1>
+       
+      \end{onlyenv}
+
+      \begin{onlyenv}<2>
+       Iterator
+       
+       \begin{lstlisting}
+*i;
+++i;
+       \end{lstlisting}
+
+      \end{onlyenv}
+      \begin{onlyenv}<3>
          OutputIterator
          
          \begin{lstlisting}
@@ -324,10 +354,10 @@ i++;
 ++i;
          \end{lstlisting}
 
-         Are special, {\tt back\_inserter}, {\tt ostream\_iterator}, ...
+         {\tt back\_inserter}, {\tt ostream\_iterator}, ...
       \end{onlyenv}
-      \begin{onlyenv}<2>
-         InputIterator a.k.a. Single-Pass Iterator
+      \begin{onlyenv}<4>
+         InputIterator 
          
          \begin{lstlisting}
 bool r = i != j;
@@ -341,7 +371,7 @@ val x = *i++;
           \vspace{2ex}
           But, if {\tt i == j} then {\tt ++i != ++j}
       \end{onlyenv}
-      \begin{onlyenv}<3>
+      \begin{onlyenv}<5>
          ForwardIterator
          \begin{lstlisting}
 iterator j = i++;
@@ -350,7 +380,7 @@ iterator j = i++;
           \vspace{2ex}
           But, if {\tt i == j} then {\tt ++i == ++j}
       \end{onlyenv}
-      \begin{onlyenv}<4>
+      \begin{onlyenv}<6>
          BidirectionalIterator
          \begin{lstlisting}
 iterator j = --i;
@@ -359,7 +389,7 @@ val x = *i--;
          \end{lstlisting}
          {\tt map< K , V >::iterator, list< T >::iterator}
       \end{onlyenv}
-      \begin{onlyenv}<5>
+      \begin{onlyenv}<7>
          RandomAccessIterator
          \begin{lstlisting}
 i += n;
@@ -373,7 +403,7 @@ bool b = i < j;
     \end{column}
   \end{columns}
 \end{frame}
-}
+
 
 
 \begin{frame}[fragile]
@@ -381,7 +411,7 @@ bool b = i < j;
   
   \begin{itemize}
    \item Simplification and generalization of iterators
-   \item Ranges in boost:
+   \item Ranges in Boost:
    \begin{itemize}
     \item Ranges are pairs of iterators.
     \item Ranges can be adapted/decorated.
@@ -391,12 +421,21 @@ bool b = i < j;
 
   \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 vector< double > values;
-// fill values
-boost::for_each( values , []( auto x ) {
-    cout << x << endl; } );
+
+std::for_each( values.begin() , values.end() ,
+    []( auto x ) { cout << x << endl; } );
+
+boost::for_each( values ,
+    []( auto x ) { cout << x << endl; } );
   \end{lstlisting}
   
-  \vspace{2ex}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+ \heading{Ranges}
+ 
   Operations on ranges:
   \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 range_t r;
@@ -404,10 +443,22 @@ using iterator = boost::range_iterator< range_t >::type;
 auto begin = boost::begin( r ); // begin iterator
 auto end = boost::end( r );     // end iterator
   \end{lstlisting}
-
+  
+  \pause
+  
+  \vspace{2ex}
+  Implementing algorithms
+  \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+template< typename Rng >
+boost::for_each( Rng & r , auto op )
+{
+    std::for_each( boost::begin(r) , boost::end(r) , op );
+}
+  \end{lstlisting}
 
 
 \end{frame}
+
 
 
 
@@ -418,28 +469,51 @@ auto end = boost::end( r );     // end iterator
   Eric Niebler: N4128: Ranges for the Standard Library.
 
   \begin{itemize}
-   \item Ranges are based on iterators
+   \item Ranges are based on iterators \pause
    \item New concepts:
    \begin{itemize}
      \item Iterable -- Container, holding the elements 
      \item Range -- Lightweight adapters (decorators)
-   \end{itemize}
-   \item Three kinds of ranges
-   \begin{itemize}
-    \item Iterator pairs, Iterator and a count, Iterator and a 
-predicate
-   \end{itemize}
-
+   \end{itemize} \pause
    \item Variants of each algorithm
      \begin{itemize}
-       \item sort( in.begin() , in.end() );
-       \item sort( in );
-       \item in | view::transform( op );
-       \item in | cont::sort( op );       
+       \item sort( rng.begin() , rng.end() );
+       \item sort( rng );
+       \item rng | view::transform( op );
+       \item rng | cont::sort( op );       
      \end{itemize}
   \end{itemize}
 }
 
+\begin{frame}[fragile]
+ \heading{Three kind of ranges}
+
+ \begin{itemize}
+  \item Pair of iterators
+  \item Iterator and a count
+  \item Iterator and a predicate
+ \end{itemize}
+ 
+ \pause
+ \vspace{2ex}
+ Algorithms are non-symmetric
+ \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+template< typename Rng , typename Op >
+void for_each( Rng & r , Op o )
+{
+    for_each( std::begin(r) , std::end(r) , o );
+}
+
+template< typename Iter , typename Sentinel , typename Op >
+void for_each( Iter iter , Sentinel s , Op op )
+{
+    // ...
+}
+ \end{lstlisting}
+
+
+
+\end{frame}
 
 
 
@@ -461,13 +535,8 @@ predicate
  \end{itemize}
  
  \vspace{2ex}
- Example: Sampled function $f(x)$
- \begin{align*}
-  t_n & = & 0.1 n & \quad \quad & \textrm{(Sampling)} & \quad 
-\quad \quad \quad \quad \\
-  x_n & = & \sin( 2 t_n ) + 0.1 & & \textrm{(Numerical sequence -- sampled 
-function)} &
- \end{align*}
+ Example: Sampled function $f(x) = \sin( 2 x ) + 0.1$
+ $$ x_n = 0.1 n \quad \quad \text{and} \quad \quad f_n = f(x_n) = \sin( 2 x_n ) + 0.1 $$
 
 \end{frame}
 
@@ -492,8 +561,8 @@ Sampling
 using namespace boost::adaptors;
 
 auto seq = boost::counting_range( 0 , n );
-auto seq2 = seq | transformed( []( auto x ) {
-    return 0.1 * static_cast< double >( x ); } );
+auto seq2 = seq | transformed(
+    []( auto x ) { return 0.1 * x; } );
 
 for( auto x : seq2 )
     cout << x << " ";
@@ -506,10 +575,10 @@ for( auto x : seq2 )
 Sampled function
 \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 auto seq = boost::counting_range( 0 , n );
-auto seq2 = seq | transformed( []( auto x ) {
-    return 0.01 * static_cast< double >( x ); } );
-auto seq3 = seq2 | transformed( []( auto x ) {
-    return sin( 2.0 * x ) + 0.1; } );
+auto seq2 = seq | transformed(
+    []( auto x ) { return 0.1 * x; } );
+auto seq3 = seq2 | transformed(
+    []( auto x ) { return sin( 2.0 * x ) + 0.1; } );
 
 for( auto x : seq3 )
     cout << x << " ";
@@ -521,14 +590,16 @@ for( auto x : seq3 )
   \begin{onlyenv}<4>
 Use a function
 \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
-auto sequence( int n , double sampling , auto f ) {
+template< typename F >
+auto sequence( int n , double sampling , F f )
+{
     auto seq = boost::counting_range( 0 , n );
-    return seq | transformed( [sampling,f]( auto x ) { 
-        return f(sampling*static_cast<double>( x ) ); } );
+    return seq | transformed(
+        [sampling,f]( auto x ) { return f(sampling*x); } );
 }
 
-auto seq = sequence(1024 ,0.1 ,[]( auto x ) {
-    return sin(2.0*x)+0.1;} );
+auto seq = sequence(1024 ,0.1 ,
+    []( auto x ) { return sin(2.0*x)+0.1;} );
 for( auto x : seq )
     cout << x << " ";
 \end{lstlisting}
@@ -536,53 +607,37 @@ for( auto x : seq )
 
 \vspace{0.5ex}\lstinline$0.1 0.298669 0.489418 0.664642 ...$
  \end{onlyenv}
- \rem{
- \begin{onlyenv}<5>
-  More complicated sequence
-\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
-auto sequence2( int n , double sampling , auto f )
-{
-    auto seq = boost::counting_range( 0 , n );
-    return seq | transformed( [sampling,f]( auto i ) {
-            double x = sampling*static_cast<double>( i );
-            return std::make_tuple(x,f(x)); } );
-
-}
-
-auto seq = sequence2( n , 0.1 , []( auto x ) {
-    return sin( 2.0 * x ) + 0.1; } );
-for( auto x : zseq )
-    cout << "(" << std::get< 0 >( x ) << ","
-         << std::get< 1 >( x ) << ") ";
-\end{lstlisting}
-\vspace{2ex}Output
-
-\vspace{0.5ex}\lstinline$(0,0.1) (0.1,0.298669) (0.2,0.489418) ...$
- \end{onlyenv}
- }
 \end{frame}
 
+\begin{frame}
+ \heading{A teaser for the standard C++ ranges}
+\end{frame}
+
+
 \begin{frame}[fragile]
-  \heading{Numerical ranges and standard C++ ranges}
-  
-  Infinite sequences:
+  \heading{Infinite sequences}
   
   \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 using std::view;
-auto sequence( double sampling , auto f ) {
-    return iota(0) | transform( [sampling,f]( auto x ) {
-        return f( sampling * x ); } );
+template< typename F >
+auto sequence( double sampling , F f )
+{
+    return iota(0) | transform(
+        [sampling,f]( auto x ) { return f(sampling*x); } );
 }
 
 for( auto x : take( sequence( 0.1 , f ) , 10 ) )
     cout << x << endl;
   \end{lstlisting}
   
-  \vspace{2ex}
-  Custom break conditions:
+\end{frame}
+
+\begin{frame}[fragile]
+  \heading{Custom break conditions}
   \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
-auto seq = take_while( sequence( 0.1 , f ) , []( auto x ) {
-    return x < 1.0; } );
+auto seq = take_while( sequence( 0.1 , f ) ,
+    []( auto x ) { return x < 1.0; } );
+
 for( auto x : seq )
     cout << x << endl;
   \end{lstlisting}
@@ -591,26 +646,33 @@ for( auto x : seq )
 
 
 \begin{frame}[fragile]
-  \heading{Numerical Ranges and standard C++ ranges}
-
-  Zipped sequences:
+  \heading{Comibining sequences -- Zipped sequences}
+  
   \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 using std::view;
 auto seq1 = sequence( 1024 , 0.01 , f1 );
 auto seq2 = sequence( 1024 , 0.01 , f2 );
 auto seq3 = zip( seq1 , seq2 );
+
 for( auto x : seq3 )
     cout << std::get<0>(x) << " "<< std::get<1>(x) << "\n";
   \end{lstlisting}
   
-  \vspace{2ex}
-  Joined sequences:
+\end{frame}
+  
+\begin{frame}[fragile]  
+  \heading{Combining sequences -- Joined sequences}
+  
+  
+  Append a sequence
   \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 auto seq3 = join( seq1 , seq2 );
   \end{lstlisting}
   
+  \pause
+  
   \vspace{2ex}
-  Cartesian sequences -- missing yet
+  Cartesian product sequences -- missing yet
 
 \end{frame}
 
@@ -676,6 +738,7 @@ class map_range
     
     iterator begin() const { return iterator( this ); }
     iterator end() const { return iterator( nullptr ); }
+    T value() const { return m_value; }
     
 private:
     mutable T m_value;
@@ -736,7 +799,8 @@ auto make_map_range( T t , F f , C condition )
 
 \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 template< typename T , typename F >
-auto make_counted_map_range( T t , F f , size_t max_iterations )
+auto make_counted_map_range( T t , F f ,
+    size_t max_iterations )
 {
     return counted_map_range< T , F >(
         std::move( t ) ,
@@ -754,9 +818,9 @@ auto make_counted_map_range( T t , F f , size_t max_iterations )
 
 \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 double r = 3.2;
-auto l = [r]( auto x ) {return r * x * ( 1.0 - x ); };
+auto f = [r]( auto x ) {return r * x * ( 1.0 - x ); };
 
-auto range = make_counted_map_range( 0.5 , l , 1000 );
+auto range = make_counted_map_range( 0.5 , f , 1000 );
 for( auto x : range )
 {
     cout << x << endl;
@@ -780,12 +844,16 @@ for( auto x : range )
   \item Each cell has two states: {\it alive} or {\it dead}
   \item Transition rules
   \begin{itemize}
-    \item Less then two neighbors -> dead (under-population)
+    \item Less than two neighbors -> dead (under-population)
     \item Two or three neighbors -> alive 
-    \item More then three neighbors -> dead (over-population)
+    \item More than three neighbors -> dead (over-population)
     \item Dead cell with three neighbors -> alive (reproduction)
   \end{itemize}
  \end{itemize}
+ 
+ \vspace{1ex}
+ \centerline{\includegraphics[draft=false,width=0.148485\textwidth]
+{98px-Game_of_life_loaf.png}}
 
 \end{frame}
 
@@ -829,8 +897,8 @@ Game of life can implement a Touring machine :)
  \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 using board = vector< vector< bool > >;
 
-auto show_board = []( board const& b ) { ... }
-auto next_board = []( board const& b ) -> board { ... }
+void show_board( board const& b ) { ... }
+board next_board( board const& b ) { ... }
 
 board b;
 // initialize b
@@ -878,7 +946,7 @@ for( auto b : r )
  \centerline{ 
 \includegraphics[draft=false,width=0.6\textwidth]{lorenz.jpg}}
 
-  Numerical solution: $x(t+\Delta t) = F( x(t) )$
+  Numerical solution: $x(t+\Delta t) = F( x(t) , f )$
 
 
 }
@@ -887,11 +955,9 @@ for( auto b : r )
 \begin{frame}[fragile]
   \heading{Example -- ODE solver}
   
-  Solve $\dot{x} = f(x,t)$, Solver $F$ : $x(t+\delta t)=F(x(t))$
-  
   Example \odeint:
   
-\begin{lstlisting}[basicstyle=\tiny\ttfamily]
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 namespace odeint = boost::numeric::odeint;
 
 auto lorenz = []( auto const& x , auto& dxdt , auto t )
@@ -906,15 +972,12 @@ odeint::runge_kutta4< state_type > stepper;
 
 state_type x {{ 10.0 , 10.0 , 10.0 }};
 double t = 0.0 , dt = 0.01;
-stepper.do_step( lorenz , x , t , dt );
-t += dt;
+for( ; t < 10.0 ; t += dt )
+{
+    stepper.do_step( lorenz , x , t , dt );
+}
   \end{lstlisting}
   
-Integrate functions:
-\begin{lstlisting}[basicstyle=\tiny\ttfamily]
-auto obs = []( auto x , auto t ) { std::cout << t << " " << x[0] << "\n"; };
-odeint::integrate_const( stepper , lorenz , x , 0.0 , 10.0 , dt , obs );
-\end{lstlisting}
 
 \end{frame}
 
@@ -922,7 +985,7 @@ odeint::integrate_const( stepper , lorenz , x , 0.0 , 10.0 , dt , obs );
  \heading{Example -- ODE solver}
  
  \begin{lstlisting}[basicstyle=\tiny\ttfamily]
-auto make_ode_range( auto sys , auto stepper , auto x ,
+auto make_ode_range = []( auto sys , auto stepper , auto x ,
     auto t0 , auto dt , auto t1 )
 {
     auto solve = [sys,stepper,dt]( auto x ) mutable { 
@@ -935,6 +998,7 @@ auto make_ode_range( auto sys , auto stepper , auto x ,
 }
  \end{lstlisting}
  
+ \pause
  Can be used as
 \begin{lstlisting}[basicstyle=\tiny\ttfamily]
 state_type x {{ 10.0 , 10.0 , 10.0 }};
@@ -1000,9 +1064,8 @@ transform} , etc.
  \heading{Newton method -- Implementation}
  
 \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
-auto newton_range(
-    auto x , auto f , auto df ,
-    auto break_condition )
+template< typename T, typename F, typename DF, typename C >
+auto newton_range( T x , F f , DF df , C break_condtion )
 {
     return make_map_range(
         x ,
@@ -1054,6 +1117,8 @@ for( auto r : range )
     \item \dots
   \end{itemize}
   \item Approximation of functions
+  \item Iterative linear solvers
+  \item Clustering methods (k-Means)
   \item \dots
  \end{itemize}
 
@@ -1082,14 +1147,14 @@ for( auto r : range )
   Outlook -- open points
   \begin{itemize}
     \item Break condition on last two values, e.g. $|v_{k}-v_{k-1}| < \epsilon$
-    \item More complicated break condition,\\e.g. count and predicate
+    \item Nested loops
   \end{itemize}
 
 
 }
 
 
-
+\rem{
 \frame{
   \heading{References}
   
@@ -1100,11 +1165,11 @@ for( auto r : range )
   \end{itemize}
 
 }
+}
 
 
 
-
-
+\rem{
 
 
 \sectionslide{Backup}
@@ -1500,6 +1565,8 @@ double n = thrust::reduce(
   \heading{Solving an ensemble of low-dimensional ODEs}
   
   Lorenz example and ODEs
+}
+
 }
 
 
